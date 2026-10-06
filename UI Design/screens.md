@@ -10,7 +10,7 @@ Room states from the PRD map to screens like this:
 | Question Active | Question live | Answer |
 | Result Reveal | Answer reveal | Correct or Wrong |
 | Leaderboard | Themed leaderboard | Correct or Wrong (rank shown) |
-| Final Podium | Winner cards | (see "Open items" in the handoff) |
+| Final Podium | Winner cards | Final rank card |
 
 ---
 
@@ -73,7 +73,7 @@ Room states from the PRD map to screens like this:
 
 **Purpose:** show standings as a scene the room enjoys watching. Full detail in [`leaderboard-themes.md`](leaderboard-themes.md).
 
-- **Header:** "AFTER QUESTION n OF N", a theme-specific headline, and **theme chips** (Summit, Grand Prix, Tour de Quiz, Moonshot, Treasure). Under them: "THEME SHUFFLES EACH QUESTION · HOST CAN PIN ONE".
+- **Header:** "AFTER QUESTION n OF N" and a theme-specific headline. In the product the theme is **chosen at random** for each question (no immediate repeats) and there is **no picker**. The **theme chips** (Summit, Grand Prix, Tour de Quiz, Moonshot, Treasure) exist only so reviewers can preview each theme in the prototype; the design labels them "PREVIEW ONLY · IN THE GAME A RANDOM THEME PLAYS EACH QUESTION". Do not build them.
 - **Scene (886×566):** the themed illustration with each top-player blob placed by score, plus a sun sticker naming the leader and their title.
 - **Standings (right):** top 5 rows with rank, blob, name, points this round, total, and a rank-change chip (mint up arrow, bubblegum down arrow, or `=`).
 - **Next question** (primary).
@@ -90,7 +90,7 @@ The PRD says the leaderboard shows the top 5, so five blobs are drawn.
 - Award stickers at the bottom: Speed Demon, Hot Streak, Comeback Kid.
 - Buttons: **Download CSV** (PRD export) and **Play again**.
 
-**Data:** top 3 with `{nickname, avatar, score, accuracy, avgMs, bestStreak}`, award winners. The PRD's summary metrics (total joined, completion rate, average accuracy, toughest question) are **not yet laid out**; see the handoff for open items.
+**Data:** top 3 with `{nickname, avatar, score, accuracy, avgMs, bestStreak}`, award winners. The PRD's summary metrics (total joined, completion rate, average accuracy, toughest question) are **not yet laid out**; see the handoff for open items. Players see their own result on the phone at the same moment (screen 13).
 
 ---
 
@@ -123,6 +123,20 @@ Mint screen with confetti and a jumping blob. "Nailed it!" and a **score receipt
 Bubblegum screen with a wobbling sad blob. "So close!", a card with **the right answer** (key badge and text) and what the player picked, a **rank** card ("5th, down 2 places") and an empty streak ("Start a new one"), then "Only 125 pts behind 4th".
 
 The sample shows a different player (sky blob) than the correct screen because it is a different result; in the product it is always the viewing player.
+
+### 13. Final rank (`PhoneFinal.dc.html`) [FR-4, FR-6]
+
+**Purpose:** every player sees how they finished, at the moment the host's winner cards appear.
+
+- Header "GAME OVER · {quiz title}" and "You finished 2nd!" (the headline adapts: "You won!" for 1st, "You finished Nth!" otherwise).
+- A **player card**, same family as the host winner cards: place and "/N players" in mono, a "TOP n%" tag, the player's hopping blob, nickname, score, and a 3-up stat grid (**accuracy, average time, best streak**). Card fill by place: 1st sun, 2nd sky, 3rd bubblegum, everyone else white. It tilts −2° and rises in. Confetti falls for ranks 1 to 3 only.
+- **Award sticker** if the player earned one (Speed Demon, Hot Streak, Comeback Kid); hidden otherwise.
+- **Ease rating:** "How easy was it to join and play?" with 1 to 5 buttons (PRD KPI, target 4.5 or higher). The selected value is sun; the sample shows 5.
+- **Save my card** (primary): saves the card as an image through the share sheet. **Join another game** returns to Enter code.
+
+**Data:** final rank, player count, percentile, score, accuracy, average response ms, best streak, optional award, quiz title. The percentile is `ceil(rank / playerCount × 100)`.
+
+**Edge cases to build:** ranks 4 and below (white card, no confetti); a tie (show the shared rank); a player who disconnected before the end (show their last known rank); zero correct answers (accuracy 0%, no award, keep the tone kind).
 
 ---
 

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Player final rank</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hop{animation:hop 1.3s ease-in-out infinite}
+@keyframes rise{from{transform:translateY(50px) rotate(-4deg);opacity:0}to{transform:rotate(-2deg);opacity:1}}
+.card{animation:rise .8s cubic-bezier(.2,1,.3,1) both}
+@keyframes fall{from{transform:translateY(-30px) rotate(0)}to{transform:translateY(880px) rotate(480deg)}}
+.cf{position:absolute;top:0;box-sizing:border-box;border:2px solid #12131A;animation:fall linear infinite}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;align-items:center;padding:26px 20px 24px;gap:14px;overflow:hidden;text-align:center">
+
+  <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="14">
+    <div class="cf" style="left:{{ c.x }}px;width:{{ c.s }}px;height:{{ c.s }}px;background:{{ c.color }};border-radius:{{ c.r }};animation-duration:{{ c.dur }};animation-delay:{{ c.delay }}"></div>
+  </sc-for>
+
+  <div style="position:relative;display:flex;flex-direction:column;gap:2px">
+    <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:3px;color:#2B4BFF">GAME OVER · FRIDAY TECH TRIVIA</span>
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:40px;line-height:1.02;letter-spacing:-1px">You finished 2nd!</span>
+  </div>
+
+  <div class="card" style="position:relative;width:100%;box-sizing:border-box;border:3.5px solid #12131A;border-radius:28px;background:#8FD3FF;box-shadow:7px 7px 0 #12131A;padding:16px 18px 18px;display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'DM Mono',monospace;font-size:44px;line-height:1">2<span style="font-size:20px">/24</span></span>
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px">TOP 8%</span>
+    </div>
+    <div class="hop" style="position:relative;width:{{ me.bs }}px;height:{{ me.bs }}px;box-sizing:border-box;background:{{ me.bc }};border:{{ me.bw }}px solid #12131A;border-radius:{{ me.br }};margin-top:4px">
+      <div style="position:absolute;{{ me.eL }}"></div><div style="position:absolute;{{ me.eR }}"></div><div style="position:absolute;{{ me.mo }}"></div>
+    </div>
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1">Maya</span>
+    <span style="font-family:'DM Mono',monospace;font-size:20px">8,420 pts</span>
+    <div style="width:100%;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:8px;margin-top:4px">
+      <div style="background:#fff;border:2.5px solid #12131A;border-radius:12px;padding:6px 4px"><div style="font-family:'DM Mono',monospace;font-size:17px">80%</div><div style="font-size:11px;font-weight:700;letter-spacing:.5px">ACCURACY</div></div>
+      <div style="background:#fff;border:2.5px solid #12131A;border-radius:12px;padding:6px 4px"><div style="font-family:'DM Mono',monospace;font-size:17px">3.4s</div><div style="font-size:11px;font-weight:700;letter-spacing:.5px">AVG TIME</div></div>
+      <div style="background:#fff;border:2.5px solid #12131A;border-radius:12px;padding:6px 4px"><div style="font-family:'DM Mono',monospace;font-size:17px">7</div><div style="font-size:11px;font-weight:700;letter-spacing:.5px">BEST STREAK</div></div>
+    </div>
+  </div>
+
+  <div style="position:relative;display:flex;align-items:center;gap:10px;background:#fff;border:2.5px solid #12131A;border-radius:14px;padding:8px 14px;box-shadow:3px 3px 0 #12131A">
+    <div style="width:30px;height:30px;border-radius:50%;border:2.5px solid #12131A;background:#FF6A2B;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#12131A"/></svg></div>
+    <div style="display:flex;flex-direction:column;text-align:left"><span style="font-weight:700;font-size:15px">Hot Streak</span><span style="font-size:13px;font-weight:600;color:#3B4152">7 correct in a row</span></div>
+  </div>
+
+  <div style="position:relative;width:100%;display:flex;flex-direction:column;gap:6px;margin-top:2px">
+    <span style="font-weight:700;font-size:14px;color:#3B4152">How easy was it to join and play?</span>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <sc-for list="{{ rating }}" as="r" hint-placeholder-count="5">
+        <button aria-label="{{ r.label }}" aria-pressed="{{ r.on }}" style="width:48px;height:44px;border-radius:12px;border:2.5px solid #12131A;background:{{ r.bg }};font-family:'DM Mono',monospace;font-size:18px;color:#12131A;padding:0">{{ r.n }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="position:relative;width:100%;display:flex;flex-direction:column;gap:10px;margin-top:auto">
+    <button class="btn" style="height:58px;border-radius:18px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;box-shadow:5px 5px 0 #12131A;display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0L8 7m4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Save my card
+    </button>
+    <button class="btn" style="height:50px;border-radius:16px;border:3px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:16px;box-shadow:4px 4px 0 #12131A">Join another game</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const cols = ['#FF6A2B', '#FF9AD5', '#2B4BFF', '#FFD43B', '#2EE6A6', '#8FD3FF'];
+    const confetti = [];
+    for (let i = 0; i < 16; i++) confetti.push({ x: (i * 71) % 370 + 6, s: 10 + (i % 3) * 4, color: cols[i % 6], r: i % 2 ? '50%' : '3px', dur: (5 + (i % 4)) + 's', delay: '-' + ((i * 0.7) % 6).toFixed(1) + 's' });
+    return { me: av(0, 112, 'grin'), confetti, rating: [1, 2, 3, 4, 5].map((n) => ({ n, label: n + ' out of 5', on: n === 5, bg: n === 5 ? '#FFD43B' : '#fff' })) };
+  }
+}
+</script>
+</body>
+</html>

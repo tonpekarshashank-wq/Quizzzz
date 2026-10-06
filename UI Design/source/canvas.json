@@ -17,16 +17,17 @@
     "PhoneWait.dc.html": { "x": 940, "y": 1880, "w": 390, "h": 844, "title": "Player · Waiting room" },
     "PhoneAnswer.dc.html": { "x": 1410, "y": 1880, "w": 390, "h": 844, "title": "Player · Answer", "is_interactive": true },
     "PhoneCorrect.dc.html": { "x": 1880, "y": 1880, "w": 390, "h": 844, "title": "Player · Correct" },
-    "PhoneWrong.dc.html": { "x": 2350, "y": 1880, "w": 390, "h": 844, "title": "Player · So close" }
+    "PhoneWrong.dc.html": { "x": 2350, "y": 1880, "w": 390, "h": 844, "title": "Player · So close" },
+    "PhoneFinal.dc.html": { "x": 2820, "y": 1880, "w": 390, "h": 844, "title": "Player · Final rank" }
   },
   "order": [
     "Main.dc.html", "Lobby.dc.html", "Foundations.dc.html", "Question.dc.html", "Reveal.dc.html", "Leaderboard.dc.html", "Podium.dc.html",
-    "PhoneJoin.dc.html", "PhoneName.dc.html", "PhoneWait.dc.html", "PhoneAnswer.dc.html", "PhoneCorrect.dc.html", "PhoneWrong.dc.html"
+    "PhoneJoin.dc.html", "PhoneName.dc.html", "PhoneWait.dc.html", "PhoneAnswer.dc.html", "PhoneCorrect.dc.html", "PhoneWrong.dc.html", "PhoneFinal.dc.html"
   ],
   "notes": {
     "t1": { "x": 0, "y": -300, "text": "1 · Build the quiz, open the room", "kind": "title1", "maxW": 4240 },
     "t2": { "x": 0, "y": 640, "text": "2 · Live on the big screen", "kind": "title1", "maxW": 5680 },
-    "t3": { "x": 0, "y": 1580, "text": "3 · On the player's phone", "kind": "title1", "maxW": 2740 }
+    "t3": { "x": 0, "y": 1580, "text": "3 · On the player's phone", "kind": "title1", "maxW": 3210 }
   },
   "designSystems": []
 }

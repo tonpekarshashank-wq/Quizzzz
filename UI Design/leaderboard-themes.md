@@ -1,6 +1,6 @@
 # Leaderboard themes
 
-The leaderboard is a **themed scene** beside a plain standings list. The list is identical in every theme so the numbers stay readable; the scene is the fun part. The host can pin one theme or let the system shuffle one per question.
+The leaderboard is a **themed scene** beside a plain standings list. The list is identical in every theme so the numbers stay readable; the scene is the fun part. **The theme is picked at random for every question** (confirmed product decision); the host has no control over it.
 
 Reference file: `source/Leaderboard.dc.html` (geometry below is taken from its script).
 
@@ -90,6 +90,6 @@ Names, header text and the leader tag come from this table.
 
 ## Rules for production
 
-- Theme selection is **host-side only**; the server only needs to know the chosen theme id for the question so the display client renders it. Shuffle is random per question, with no immediate repeats.
+- Theme selection is **random per question, made by the server**, with no immediate repeats, and sent as a `theme` id on the leaderboard event. There is no host picker. The theme chips in the design file are a **review-only preview** and must not be built.
 - The scene is **decorative**. Always keep the standings list as the accessible source of truth, and give the scene an `aria-label` summarising the leader.
 - Respect `prefers-reduced-motion`: show scenes static.

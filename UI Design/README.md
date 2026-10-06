@@ -12,6 +12,16 @@ Goals the design serves:
 - **Zero-friction joining:** a 6-digit code (or QR) and a nickname. No account.
 - **Excitement:** big-screen moments (ticket lobby, fuse timer, animated reveal, themed leaderboard, winner cards) and phone feedback (score receipt, streaks, rank arrows).
 
+## Product decisions (confirmed)
+
+| Question | Decision |
+| :--- | :--- |
+| New answer colors (tangerine, cobalt, sun, mint with the four shapes) | **Approved.** This replaces the PRD's red, blue, yellow, green. |
+| Blob avatars | **In MVP scope.** Players pick a body and a mood at join. |
+| Leaderboard theme | **Random** each question, no immediate repeats. There is no host picker. |
+| Streaks | **Cosmetic only.** They never affect scoring. |
+| Final rank for players | **Yes.** Each player sees their own final rank card (screen 13). |
+
 ## Contents
 
 | File | What it is |
@@ -31,7 +41,7 @@ The designs were authored on a Claude design canvas: https://claude.ai/artifact/
 
 That link is **private to its owner**. Ask the owner to share it, or use the files in `source/`.
 
-`source/` holds 13 `.dc.html` artboard files plus `canvas.json` (the canvas index with each artboard's position and size). They are the exact files that produce the canvas, so inline styles and the small logic blocks in them are accurate references for sizes, colors and geometry. They need the canvas runtime (`support.js`) to render, so they will **not** open correctly in a plain browser. Treat them as a precise reference, not as production code.
+`source/` holds 14 `.dc.html` artboard files plus `canvas.json` (the canvas index with each artboard's position and size). They are the exact files that produce the canvas, so inline styles and the small logic blocks in them are accurate references for sizes, colors and geometry. They need the canvas runtime (`support.js`) to render, so they will **not** open correctly in a plain browser. Treat them as a precise reference, not as production code.
 
 | Artboard file | Screen | Size |
 | :--- | :--- | :--- |
@@ -48,9 +58,10 @@ That link is **private to its owner**. Ask the owner to share it, or use the fil
 | `PhoneAnswer.dc.html` | Player: answer (interactive) | 390×844 |
 | `PhoneCorrect.dc.html` | Player: correct result | 390×844 |
 | `PhoneWrong.dc.html` | Player: wrong result | 390×844 |
+| `PhoneFinal.dc.html` | Player: final rank card | 390×844 |
 
 ## Status and caveats
 
 - This is a **design**, not a built app. All names, scores and counts are sample data, consistent across screens (for example Maya is 3rd with 3,410 points).
-- The four answer colors differ from the PRD (see [`developer-handoff.md`](developer-handoff.md#deviations-from-the-prd)).
+- The four answer colors differ from the PRD. The change is approved (see [`developer-handoff.md`](developer-handoff.md#deviations-from-the-prd)).
 - Phone screens are drawn at 390px wide. The PRD requires support down to 320px, which still needs to be checked during build.
