@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Make your blob</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,input{font-family:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.big{animation:bob 2.6s ease-in-out infinite}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;padding:34px 24px 30px;gap:20px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <span style="font-family:'DM Mono',monospace;font-size:13px;background:#fff;border:2px solid #12131A;border-radius:10px;padding:4px 10px">PIN 839 201</span>
+    <span style="font-weight:700;font-size:14px;color:#3B4152">Friday Tech Trivia</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-1px">Make your blob</span>
+    <span style="font-weight:600;font-size:16px;color:#3B4152">It races for you on the big screen.</span>
+  </div>
+
+  <div style="flex:none;height:230px;border:3px solid #12131A;border-radius:28px;background:#fff;box-shadow:5px 5px 0 #12131A;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(#D7D3C8 1.5px, transparent 1.5px);background-size:18px 18px">
+    <div class="big" style="position:relative;width:{{ me.bs }}px;height:{{ me.bs }}px;box-sizing:border-box;background:{{ me.bc }};border:{{ me.bw }}px solid #12131A;border-radius:{{ me.br }}">
+      <div style="position:absolute;{{ me.eL }}"></div><div style="position:absolute;{{ me.eR }}"></div><div style="position:absolute;{{ me.mo }}"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">BODY</span>
+    <div style="display:flex;justify-content:space-between">
+      <sc-for list="{{ bodies }}" as="b" hint-placeholder-count="6">
+        <button aria-label="{{ b.label }}" aria-pressed="{{ b.on }}" style="width:48px;height:48px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center">
+          <div style="width:40px;height:40px;box-sizing:border-box;background:{{ b.bc }};border:3px solid #12131A;border-radius:{{ b.br }};box-shadow:{{ b.ring }}"></div>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">MOOD</span>
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ moods }}" as="m" hint-placeholder-count="3">
+        <button aria-pressed="{{ m.on }}" style="flex:1;height:44px;border-radius:12px;border:2.5px solid #12131A;background:{{ m.bg }};color:{{ m.ink }};font-weight:700;font-size:15px">{{ m.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152"><label for="nick">NICKNAME</label><span>4 / 25</span></div>
+    <input id="nick" value="Maya" style="height:60px;border-radius:16px;border:3px solid #2B4BFF;background:#fff;box-shadow:4px 4px 0 #2B4BFF;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;padding:0 18px;width:100%;box-sizing:border-box">
+  </div>
+
+  <button class="btn" style="margin-top:auto;height:66px;border-radius:20px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;box-shadow:5px 5px 0 #12131A;display:flex;align-items:center;justify-content:center;gap:12px">
+    Let's go
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+  </button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%', n: 'Tangerine round' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%', n: 'Bubblegum wobbly' }, { c: '#2B4BFF', r: '30%', ink: '#fff', n: 'Cobalt squishy' }, { c: '#FFD43B', r: '50% 50% 18% 50%', n: 'Sun leaf' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%', n: 'Mint drift' }, { c: '#8FD3FF', r: '50% 50% 50% 14%', n: 'Sky drop' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    return {
+      me: av(0, 150, 'grin'),
+      bodies: BL.map((b, i) => ({ bc: b.c, br: b.r, label: b.n, on: i === 0, ring: i === 0 ? '0 0 0 3px #F4F2EC, 0 0 0 6px #2B4BFF' : 'none' })),
+      moods: [['Happy', true], ['Cheeky', false], ['Ooh', false]].map(([label, on]) => ({ label, on, bg: on ? '#2B4BFF' : '#fff', ink: on ? '#fff' : '#12131A' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

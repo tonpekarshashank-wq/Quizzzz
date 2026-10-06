@@ -1,0 +1,76 @@
+/* Quizzzz design tokens. Mirrors tokens.json. */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap");
+
+:root {
+  /* Color */
+  --ink: #12131a;
+  --chalk: #f4f2ec;
+  --white: #ffffff;
+  --cobalt: #2b4bff;
+  --cobalt-deep: #1b30c4;
+  --cobalt-tint: #c9d2ff;
+  --tangerine: #ff6a2b;
+  --tangerine-tint: #ffd2bd;
+  --sun: #ffd43b;
+  --sun-tint: #fff3b8;
+  --mint: #2ee6a6;
+  --mint-tint: #cffae8;
+  --bubblegum: #ff9ad5;
+  --bubblegum-tint: #ffd0eb;
+  --sky: #8fd3ff;
+  --sky-tint: #d3eeff;
+  --muted: #3b4152;
+
+  /* Answer keys: color plus shape. Diamond uses a white shape. */
+  --key-1: var(--tangerine); /* triangle */
+  --key-2: var(--cobalt);    /* diamond  */
+  --key-3: var(--sun);       /* circle   */
+  --key-4: var(--mint);      /* square   */
+
+  /* Type */
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --font-data: "DM Mono", monospace;
+  --font-body: "Instrument Sans", sans-serif;
+
+  /* Shape */
+  --border-thin: 2.5px;
+  --border-card: 3px;
+  --border-hero: 3.5px;
+  --radius-chip: 10px;
+  --radius-control: 16px;
+  --radius-card: 26px;
+  --radius-pill: 999px;
+
+  /* Hard shadows (no blur) */
+  --shadow-small: 3px 3px 0 var(--ink);
+  --shadow-card: 5px 5px 0 var(--ink);
+  --shadow-button: 6px 6px 0 var(--ink);
+  --shadow-hero: 8px 8px 0 var(--ink);
+  --shadow-focus-card: 5px 5px 0 var(--cobalt);
+
+  /* Motion */
+  --press: 80ms;
+}
+
+/* Sticker button: press into its shadow */
+.btn {
+  border: var(--border-card) solid var(--ink);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--ink);
+  transition: transform var(--press);
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn-primary { background: var(--tangerine); }
+.btn-secondary { background: var(--white); font-family: var(--font-body); font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

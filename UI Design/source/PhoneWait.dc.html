@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Waiting room</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+.big{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.sm{animation:bob2 2.2s ease-in-out infinite}
+.sm:nth-child(2n){animation-delay:.5s}
+.sm:nth-child(3n){animation-delay:1s}
+@keyframes dots{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.d{animation:dots 1.4s infinite}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#2B4BFF;color:#fff;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px 24px 0;gap:26px;overflow:hidden;text-align:center">
+
+  <span style="display:flex;align-items:center;gap:8px;background:#fff;color:#12131A;border:2.5px solid #12131A;border-radius:999px;padding:7px 16px;font-weight:700;font-size:15px;box-shadow:3px 3px 0 #12131A"><span style="width:10px;height:10px;border-radius:50%;background:#2EE6A6;border:2px solid #12131A"></span>You're in · 24 players</span>
+
+  <div style="margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:22px">
+    <div class="big" style="position:relative;width:{{ me.bs }}px;height:{{ me.bs }}px;box-sizing:border-box;background:{{ me.bc }};border:{{ me.bw }}px solid #12131A;border-radius:{{ me.br }}">
+      <div style="position:absolute;{{ me.eL }}"></div><div style="position:absolute;{{ me.eR }}"></div><div style="position:absolute;{{ me.mo }}"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:50px;line-height:1;letter-spacing:-1px">Hey, Maya!</span>
+      <span style="font-weight:600;font-size:18px">Waiting for the host<span class="d">.</span><span class="d" style="animation-delay:.2s">.</span><span class="d" style="animation-delay:.4s">.</span></span>
+    </div>
+  </div>
+
+  <div style="width:100%;border:3px solid #12131A;border-radius:22px;background:#fff;color:#12131A;box-shadow:5px 5px 0 #12131A;padding:16px 18px;display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:6px">
+    <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">HOW IT WORKS</span>
+    <div style="display:flex;gap:12px;align-items:center;font-weight:700;font-size:16px"><span style="flex:none;width:30px;height:30px;border:2.5px solid #12131A;border-radius:9px;background:#FFD43B;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:15px">1</span>Answer fast, score more</div>
+    <div style="display:flex;gap:12px;align-items:center;font-weight:700;font-size:16px"><span style="flex:none;width:30px;height:30px;border:2.5px solid #12131A;border-radius:9px;background:#2EE6A6;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:15px">2</span>Right answers keep your streak</div>
+    <div style="display:flex;gap:12px;align-items:center;font-weight:700;font-size:16px"><span style="flex:none;width:30px;height:30px;border:2.5px solid #12131A;border-radius:9px;background:#FF9AD5;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:15px">3</span>Your blob races to the finish</div>
+  </div>
+
+  <div style="margin-top:auto;display:flex;justify-content:center;padding-bottom:0;width:100%">
+    <sc-for list="{{ crowd }}" as="p" hint-placeholder-count="7">
+      <div class="sm" style="flex:none;margin:0 -10px -34px;width:{{ p.bs }}px;height:{{ p.bs }}px;box-sizing:border-box;background:{{ p.bc }};border:{{ p.bw }}px solid #12131A;border-radius:{{ p.br }};position:relative">
+        <div style="position:absolute;{{ p.eL }}"></div><div style="position:absolute;{{ p.eR }}"></div><div style="position:absolute;{{ p.mo }}"></div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const ms = ['smile', 'grin', 'o'];
+    return { me: av(0, 150, 'grin'), crowd: [1, 3, 2, 5, 4, 1, 3, 5].map((k, i) => av(k, 84, ms[i % 3])) };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Themed leaderboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes bobm{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.bobm{animation:bobm 1.8s ease-in-out infinite}
+@keyframes appear{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+.ap{animation:appear .5s ease-out both}
+</style>
+</helmet>
+<div style="width:1360px;height:820px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;padding:28px 48px 30px;gap:16px;overflow:hidden">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-family:'DM Mono',monospace;font-size:14px;letter-spacing:2px;color:#2B4BFF">AFTER QUESTION 3 OF 10</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:52px;line-height:1;letter-spacing:-1.5px">{{ t.headline }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <div style="display:flex;gap:8px">
+        <sc-for list="{{ themes }}" as="h" hint-placeholder-count="5">
+          <button class="btn" onClick="{{ h.pick }}" aria-pressed="{{ h.on }}" style="height:40px;padding:0 14px;border-radius:12px;border:2.5px solid #12131A;background:{{ h.bg }};color:{{ h.ink }};font-weight:700;font-size:14px;box-shadow:{{ h.shadow }}">{{ h.label }}</button>
+        </sc-for>
+      </div>
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;color:#3B4152">THEME SHUFFLES EACH QUESTION · HOST CAN PIN ONE</span>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;gap:24px;min-height:0">
+
+    <div style="position:relative;flex:none;width:886px;height:566px;box-sizing:border-box;border:3px solid #12131A;border-radius:28px;box-shadow:6px 6px 0 #12131A;overflow:hidden">
+      <div style="position:relative;width:880px;height:560px;overflow:hidden">
+
+        <sc-if value="{{ isSummit }}" hint-placeholder-val="{{ true }}">
+          <svg width="880" height="560" viewBox="0 0 880 560" style="position:absolute;left:0;top:0">
+            <rect width="880" height="560" fill="#D3EEFF"/>
+            <circle cx="120" cy="96" r="42" fill="#FFD43B" stroke="#12131A" stroke-width="3"/>
+            <polygon points="0,530 170,250 300,420 430,200 580,530" fill="#C9D2FF" stroke="#12131A" stroke-width="3" stroke-linejoin="round"/>
+            <polygon points="560,530 790,250 880,370 880,530" fill="#C9D2FF" stroke="#12131A" stroke-width="3" stroke-linejoin="round"/>
+            <g fill="#fff" stroke="#12131A" stroke-width="3"><ellipse cx="270" cy="84" rx="48" ry="18"/><ellipse cx="300" cy="72" rx="30" ry="16"/><ellipse cx="790" cy="130" rx="50" ry="18"/><ellipse cx="760" cy="118" rx="28" ry="14"/></g>
+            <rect y="520" width="880" height="40" fill="#2EE6A6" stroke="#12131A" stroke-width="3"/>
+            <polygon points="10,530 640,70 870,530" fill="#2B4BFF" stroke="#12131A" stroke-width="4" stroke-linejoin="round"/>
+            <polygon points="640,70 870,530 720,530" fill="#1B30C4" opacity=".55"/>
+            <polygon points="640,70 670,130 652,120 640,140 626,122 604,138 560,130" fill="#fff" stroke="#12131A" stroke-width="3" stroke-linejoin="round"/>
+            <g fill="#2EE6A6" stroke="#12131A" stroke-width="3" stroke-linejoin="round"><polygon points="40,522 62,466 84,522"/><polygon points="76,522 96,480 116,522"/><polygon points="800,522 822,470 844,522"/><polygon points="760,522 778,486 796,522"/></g>
+            <polyline points="{{ summit.trail }}" fill="none" stroke="#12131A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="{{ summit.trail }}" fill="none" stroke="#FFD43B" stroke-width="5" stroke-dasharray="1 12" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="640" y1="72" x2="640" y2="20" stroke="#12131A" stroke-width="4" stroke-linecap="round"/>
+            <polygon points="642,20 692,36 642,52" fill="#FF6A2B" stroke="#12131A" stroke-width="3" stroke-linejoin="round"/>
+            <text x="110" y="548" font-family="DM Mono" font-size="13" fill="#12131A" letter-spacing="2">BASE CAMP</text>
+            <text x="676" y="80" font-family="DM Mono" font-size="13" fill="#12131A" letter-spacing="2">SUMMIT</text>
+          </svg>
+        </sc-if>
+
+        <sc-if value="{{ isGp }}">
+          <svg width="880" height="560" viewBox="0 0 880 560" style="position:absolute;left:0;top:0">
+            <rect width="880" height="560" fill="#BFF5E0"/>
+            <rect x="300" y="6" width="280" height="30" rx="8" fill="#FFD43B" stroke="#12131A" stroke-width="3"/>
+            <rect x="240" y="524" width="400" height="28" rx="8" fill="#FF9AD5" stroke="#12131A" stroke-width="3"/>
+            <ellipse cx="440" cy="285" rx="330" ry="190" fill="none" stroke="#12131A" stroke-width="102"/>
+            <ellipse cx="440" cy="285" rx="330" ry="190" fill="none" stroke="#3B3F4E" stroke-width="90"/>
+            <ellipse cx="440" cy="285" rx="330" ry="190" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="18 16" opacity=".8"/>
+            <text x="440" y="285" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="60" fill="#12131A" letter-spacing="-2">GRAND PRIX</text>
+            <text x="440" y="326" text-anchor="middle" font-family="DM Mono" font-size="20" fill="#12131A" letter-spacing="3">LAP 3 / 10</text>
+            <g fill="#FF6A2B" stroke="#12131A" stroke-width="2.5"><circle cx="404" cy="372" r="9"/><circle cx="440" cy="372" r="9" fill="#FFD43B"/><circle cx="476" cy="372" r="9" fill="#2EE6A6"/></g>
+          </svg>
+          <div style="position:absolute;left:426px;top:{{ gp.fy }}px;width:28px;height:98px;border:3px solid #12131A;box-sizing:border-box;background:repeating-conic-gradient(#12131A 0 25%, #fff 0 50%) 0 0 / 14px 14px"></div>
+        </sc-if>
+
+        <sc-if value="{{ isTour }}">
+          <svg width="880" height="560" viewBox="0 0 880 560" style="position:absolute;left:0;top:0">
+            <rect width="880" height="560" fill="#D3EEFF"/>
+            <circle cx="740" cy="90" r="40" fill="#FFD43B" stroke="#12131A" stroke-width="3"/>
+            <polygon points="0,420 120,320 260,400 400,290 560,380 700,270 880,350 880,560 0,560" fill="#C9D2FF" stroke="#12131A" stroke-width="3" stroke-linejoin="round"/>
+            <g fill="#fff" stroke="#12131A" stroke-width="3"><ellipse cx="170" cy="96" rx="50" ry="18"/><ellipse cx="204" cy="84" rx="30" ry="15"/><ellipse cx="470" cy="150" rx="46" ry="16"/></g>
+            <polygon points="{{ tour.ground }}" fill="#2EE6A6" stroke="#12131A" stroke-width="4" stroke-linejoin="round"/>
+            <polyline points="{{ tour.road }}" fill="none" stroke="#12131A" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="{{ tour.road }}" fill="none" stroke="#3B3F4E" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="{{ tour.road }}" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="14 14" opacity=".8"/>
+            <line x1="828" y1="262" x2="828" y2="190" stroke="#12131A" stroke-width="5"/><line x1="870" y1="262" x2="870" y2="190" stroke="#12131A" stroke-width="5"/>
+            <rect x="826" y="186" width="46" height="26" fill="#fff" stroke="#12131A" stroke-width="3"/>
+            <text x="849" y="204" text-anchor="middle" font-family="DM Mono" font-size="11" fill="#12131A" letter-spacing="1">FINISH</text>
+            <text x="24" y="548" font-family="DM Mono" font-size="13" fill="#12131A" letter-spacing="2">START</text>
+            <text x="560" y="548" font-family="DM Mono" font-size="13" fill="#12131A" letter-spacing="2">CATEGORY 1 CLIMB</text>
+          </svg>
+        </sc-if>
+
+        <sc-if value="{{ isMoon }}">
+          <svg width="880" height="560" viewBox="0 0 880 560" style="position:absolute;left:0;top:0">
+            <rect width="880" height="560" fill="#12131A"/>
+            <g fill="#F4F2EC"><circle cx="80" cy="60" r="2"/><circle cx="220" cy="120" r="3"/><circle cx="330" cy="50" r="2"/><circle cx="450" cy="170" r="2"/><circle cx="560" cy="70" r="3"/><circle cx="640" cy="240" r="2"/><circle cx="360" cy="300" r="2"/><circle cx="240" cy="400" r="3"/><circle cx="560" cy="470" r="2"/><circle cx="780" cy="330" r="3"/><circle cx="700" cy="500" r="2"/><circle cx="130" cy="230" r="2"/></g>
+            <g fill="#FFD43B"><circle cx="500" cy="260" r="3"/><circle cx="170" cy="330" r="2"/><circle cx="820" cy="450" r="2"/></g>
+            <circle cx="40" cy="570" r="170" fill="#2B4BFF" stroke="#8FD3FF" stroke-width="5"/>
+            <g fill="#2EE6A6"><ellipse cx="120" cy="450" rx="46" ry="22" transform="rotate(-20 120 450)"/><ellipse cx="40" cy="410" rx="30" ry="16"/></g>
+            <circle cx="770" cy="112" r="78" fill="#F4F2EC"/>
+            <g fill="#D7D3C8"><circle cx="742" cy="92" r="16"/><circle cx="800" cy="140" r="12"/><circle cx="760" cy="152" r="8"/><circle cx="802" cy="84" r="7"/></g>
+            <path d="M100 500 Q130 150 760 112" fill="none" stroke="#FFD43B" stroke-width="4" stroke-dasharray="1 14" stroke-linecap="round"/>
+            <line x1="740" y1="38" x2="740" y2="8" stroke="#F4F2EC" stroke-width="3"/><polygon points="741,8 768,17 741,26" fill="#FF6A2B"/>
+            <text x="30" y="500" font-family="DM Mono" font-size="13" fill="#F4F2EC" letter-spacing="2">EARTH</text>
+            <text x="716" y="214" font-family="DM Mono" font-size="13" fill="#F4F2EC" letter-spacing="2">THE MOON</text>
+          </svg>
+        </sc-if>
+
+        <sc-if value="{{ isMap }}">
+          <svg width="880" height="560" viewBox="0 0 880 560" style="position:absolute;left:0;top:0">
+            <rect width="880" height="560" fill="#FBF1D6"/>
+            <g fill="#D3EEFF" stroke="#12131A" stroke-width="3"><path d="M0 40 Q40 20 80 40 T160 40 T240 40 T320 40 V0 H0z" opacity=".0"/></g>
+            <g stroke="#8FD3FF" stroke-width="4" fill="none" stroke-linecap="round"><path d="M300 60q12-10 24 0t24 0"/><path d="M620 90q12-10 24 0t24 0"/><path d="M90 300q12-10 24 0t24 0"/><path d="M360 380q12-10 24 0t24 0"/><path d="M740 420q12-10 24 0t24 0"/><path d="M200 520q12-10 24 0t24 0"/></g>
+            <g fill="#2EE6A6" stroke="#12131A" stroke-width="3.5"><ellipse cx="170" cy="150" rx="78" ry="42"/><ellipse cx="440" cy="500" rx="84" ry="34"/><ellipse cx="720" cy="500" rx="72" ry="30"/><ellipse cx="540" cy="120" rx="62" ry="32"/></g>
+            <g fill="#FFD43B" stroke="#12131A" stroke-width="3" stroke-linejoin="round"><polygon points="150,142 166,100 182,142"/><polygon points="176,150 190,118 204,150"/><polygon points="530,112 544,80 558,112"/></g>
+            <path d="{{ map.route }}" fill="none" stroke="#FF6A2B" stroke-width="5" stroke-dasharray="10 10" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M786 176 834 224M834 176 786 224" stroke="#12131A" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="810" cy="450" r="0" fill="none"/>
+            <g transform="translate(86 86)"><circle r="40" fill="#fff" stroke="#12131A" stroke-width="3.5"/><polygon points="0,-34 8,0 0,34 -8,0" fill="#FF6A2B" stroke="#12131A" stroke-width="2.5" stroke-linejoin="round"/><polygon points="-34,0 0,-8 34,0 0,8" fill="#2B4BFF" stroke="#12131A" stroke-width="2.5" stroke-linejoin="round"/><text y="-44" text-anchor="middle" font-family="DM Mono" font-size="14" fill="#12131A">N</text></g>
+            <text x="760" y="262" font-family="DM Mono" font-size="13" fill="#12131A" letter-spacing="2">X MARKS IT</text>
+          </svg>
+        </sc-if>
+
+        <sc-for list="{{ markers }}" as="m" hint-placeholder-count="5">
+          <div class="ap" style="position:absolute;left:{{ m.x }}px;top:{{ m.y }}px;width:0;height:0;animation-delay:{{ m.delay }}">
+            <div style="position:absolute;left:-40px;top:-40px;width:80px;height:80px;transform:rotate({{ m.rot }}deg) scale({{ m.sc }})">
+              <sc-if value="{{ m.hiker }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;left:18px;bottom:6px;width:44px;height:10px;border-radius:50%;background:rgba(18,19,26,.28)"></div>
+                <div style="position:absolute;left:8px;top:32px;width:18px;height:28px;background:#FF6A2B;border:3px solid #12131A;border-radius:7px"></div>
+              </sc-if>
+              <sc-if value="{{ m.bike }}">
+                <div style="position:absolute;left:0;bottom:2px;width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:4px solid #12131A;background:#fff"></div>
+                <div style="position:absolute;right:0;bottom:2px;width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:4px solid #12131A;background:#fff"></div>
+                <svg width="80" height="40" viewBox="0 0 80 40" style="position:absolute;left:0;bottom:0"><path d="M16 22 38 8h14l12 14M38 8l-6 14h24" stroke="#12131A" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </sc-if>
+              <sc-if value="{{ m.kart }}">
+                <div style="position:absolute;left:8px;bottom:8px;width:64px;height:28px;box-sizing:border-box;border-radius:10px 16px 8px 8px;background:{{ m.bc }};border:3px solid #12131A"></div>
+                <div style="position:absolute;left:14px;bottom:0;width:18px;height:12px;background:#12131A;border-radius:4px"></div>
+                <div style="position:absolute;right:14px;bottom:0;width:18px;height:12px;background:#12131A;border-radius:4px"></div>
+              </sc-if>
+              <sc-if value="{{ m.rocket }}">
+                <div style="position:absolute;left:22px;top:6px;width:36px;height:64px;box-sizing:border-box;border-radius:50% 50% 8px 8px / 62% 62% 8px 8px;background:#fff;border:3px solid #12131A"></div>
+                <div style="position:absolute;left:12px;top:46px;width:12px;height:26px;box-sizing:border-box;background:{{ m.bc }};border:3px solid #12131A;border-radius:4px 0 8px 8px"></div>
+                <div style="position:absolute;right:12px;top:46px;width:12px;height:26px;box-sizing:border-box;background:{{ m.bc }};border:3px solid #12131A;border-radius:0 4px 8px 8px"></div>
+                <div style="position:absolute;left:30px;top:72px;width:20px;height:22px;box-sizing:border-box;background:#FF6A2B;border:3px solid #12131A;border-radius:0 0 50% 50%"></div>
+              </sc-if>
+              <sc-if value="{{ m.boat }}">
+                <div style="position:absolute;left:38px;top:4px;width:3px;height:36px;background:#12131A"></div>
+                <div style="position:absolute;left:8px;bottom:6px;width:64px;height:22px;box-sizing:border-box;background:#fff;border:3px solid #12131A;border-radius:4px 4px 30px 30px"></div>
+              </sc-if>
+              <div class="bobm" style="position:absolute;left:{{ m.bl }}px;top:{{ m.by }}px;width:{{ m.bs }}px;height:{{ m.bs }}px;box-sizing:border-box;background:{{ m.bc }};border:{{ m.bw }}px solid #12131A;border-radius:{{ m.br }}">
+                <div style="position:absolute;{{ m.eL }}"></div><div style="position:absolute;{{ m.eR }}"></div><div style="position:absolute;{{ m.mo }}"></div>
+              </div>
+            </div>
+            <div style="position:absolute;left:0;top:{{ m.ny }}px;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:#fff;border:2.5px solid #12131A;border-radius:999px;padding:1px 9px 1px 2px;white-space:nowrap">
+              <span style="width:20px;height:20px;border-radius:50%;background:#12131A;color:#fff;font-family:'DM Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center">{{ m.rank }}</span>
+              <span style="font-weight:700;font-size:13px">{{ m.name }}</span>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="position:absolute;left:16px;top:16px;display:flex;align-items:center;gap:8px;background:#FFD43B;border:2.5px solid #12131A;border-radius:12px;padding:6px 12px;box-shadow:3px 3px 0 #12131A">
+          <svg width="18" height="14" viewBox="0 0 64 46"><path d="M4 40 0 8l16 14L32 0l16 22L64 8l-4 32z" fill="#12131A"/></svg>
+          <span style="font-weight:700;font-size:14px">Priya · {{ t.tag }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:0;border:3px solid #12131A;border-radius:28px;background:#fff;box-shadow:6px 6px 0 #12131A;padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Standings</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;color:#3B4152">TOP 5 OF 24</span>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+        <div style="flex:1;display:flex;align-items:center;gap:12px;border-radius:16px;background:{{ r.bg }};border:2.5px solid #12131A;padding:0 12px 0 10px;min-height:0">
+          <span style="width:26px;font-family:'DM Mono',monospace;font-size:26px;text-align:center">{{ r.rank }}</span>
+          <div style="position:relative;flex:none;width:{{ r.bs }}px;height:{{ r.bs }}px;box-sizing:border-box;background:{{ r.bc }};border:{{ r.bw }}px solid #12131A;border-radius:{{ r.br }}">
+            <div style="position:absolute;{{ r.eL }}"></div><div style="position:absolute;{{ r.eR }}"></div><div style="position:absolute;{{ r.mo }}"></div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+            <span style="font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:13px;color:#3B4152">{{ r.gain }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+            <span style="font-family:'DM Mono',monospace;font-size:20px;line-height:1">{{ r.score }}</span>
+            <span style="display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:12px;background:{{ r.chip }};border:2px solid #12131A;border-radius:7px;padding:0 6px">
+              <sc-if value="{{ r.up }}" hint-placeholder-val="{{ true }}"><svg width="10" height="10" viewBox="0 0 24 24"><path d="M12 4 21 19H3z" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ r.down }}"><svg width="10" height="10" viewBox="0 0 24 24"><path d="M12 20 3 5h18z" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ r.same }}"><span>=</span></sc-if>{{ r.delta }}
+            </span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <span style="font-weight:600;font-size:15px;color:#3B4152">{{ t.sub }}</span>
+    <button class="btn" style="height:58px;padding:0 32px;border-radius:18px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;box-shadow:5px 5px 0 #12131A;display:flex;align-items:center;gap:12px">
+      Next question
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { theme: 'summit' }; }
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const fmt = (n) => n.toLocaleString('en-US');
+    const theme = this.state.theme;
+    const along = (pts, t) => {
+      const L = []; let tot = 0;
+      for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(l); tot += l; }
+      let d = t * tot;
+      for (let i = 0; i < L.length; i++) {
+        if (d <= L[i] || i === L.length - 1) { const f = Math.min(1, d / L[i]); const a = pts[i], b = pts[i + 1]; return { x: a[0] + (b[0] - a[0]) * f, y: a[1] + (b[1] - a[1]) * f, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI }; }
+        d -= L[i];
+      }
+    };
+    const str = (pts) => pts.map((p) => p[0] + ',' + p[1]).join(' ');
+    const trail = [[110, 505], [760, 480], [240, 430], [700, 375], [350, 325], [650, 285], [460, 240], [630, 200], [575, 150], [640, 98]];
+    const road = [[0, 505], [110, 470], [220, 492], [340, 430], [450, 452], [560, 372], [670, 384], [770, 300], [830, 262], [880, 262]];
+    const ground = str(road) + ' 880,560 0,560';
+    const mapPts = []; for (let i = 0; i <= 48; i++) { const u = i / 48; mapPts.push([Math.round(70 + u * 740), Math.round(420 - 220 * u + 58 * Math.sin(u * Math.PI * 3.2))]); }
+    const route = 'M' + mapPts.map((p) => p[0] + ' ' + p[1]).join(' L');
+    const GP = { cx: 440, cy: 285, rx: 330, ry: 190 };
+
+    const data = [
+      { name: 'Priya', k: 1, m: 'grin', score: 3790, gain: 1950, d: 2 },
+      { name: 'Dev_42', k: 2, m: 'smile', score: 3640, gain: 0, d: -1 },
+      { name: 'Maya', k: 0, m: 'grin', score: 3410, gain: 1820, d: 3 },
+      { name: 'Luis', k: 3, m: 'smile', score: 3105, gain: 1640, d: 0 },
+      { name: 'Captain Ana', k: 5, m: 'o', score: 2980, gain: 0, d: -2 }
+    ];
+    const meta = {
+      summit: { headline: 'The summit push', tag: 'Leads the climb', sub: 'Climb the trail. First to the flag wins the mountain.' },
+      gp: { headline: 'Grand Prix finale', tag: 'Pole position', sub: 'Every point is another corner. Ten questions make a full race.' },
+      tour: { headline: 'The final climb', tag: 'Yellow jersey', sub: 'The peloton is stretching out. Win the climb, win the stage.' },
+      moon: { headline: 'Mission to the Moon', tag: 'Closest to the Moon', sub: 'Rockets are in orbit. Keep your fuel up for the last burn.' },
+      map: { headline: 'Hunt for the X', tag: 'Nearest the treasure', sub: 'Follow the route. The first ship to the X takes the chest.' }
+    };
+
+    const markers = data.map((p, i) => {
+      const t = 0.2 + 0.6 * (p.score - 2600) / 1300;
+      const alt = i % 2 === 0 ? 1 : -1;
+      let x = 0, y = 0, rot = 0, sc = 1, bs = 46, by = 14, ny = alt > 0 ? 38 : -62;
+      const flag = { hiker: false, bike: false, kart: false, rocket: false, boat: false };
+      if (theme === 'summit') { const q = along(trail, t); x = q.x; y = q.y - 22; flag.hiker = true; }
+      else if (theme === 'gp') {
+        const a = (90 + t * 360) * Math.PI / 180;
+        x = GP.cx + GP.rx * Math.cos(a); y = GP.cy + GP.ry * Math.sin(a);
+        rot = Math.atan2(GP.ry * Math.cos(a), -GP.rx * Math.sin(a)) * 180 / Math.PI;
+        flag.kart = true; bs = 40; by = 8; ny = 40;
+        if (Math.abs(rot) > 90) { /* keep helmets upright */ rot = rot > 0 ? rot - 180 : rot + 180; }
+      } else if (theme === 'tour') {
+        const q = along(road, t); x = q.x; y = q.y - 30 + alt * 10; rot = q.ang * 0.8; sc = 0.85; flag.bike = true; bs = 40; by = 2; ny = alt > 0 ? 34 : -56;
+      } else if (theme === 'moon') {
+        const s = 1 - t, P0 = [100, 500], C = [130, 150], P2 = [760, 112];
+        x = s * s * P0[0] + 2 * s * t * C[0] + t * t * P2[0]; y = s * s * P0[1] + 2 * s * t * C[1] + t * t * P2[1];
+        const dx = 2 * s * (C[0] - P0[0]) + 2 * t * (P2[0] - C[0]), dy = 2 * s * (C[1] - P0[1]) + 2 * t * (P2[1] - C[1]);
+        const ang = Math.atan2(dy, dx) * 180 / Math.PI; rot = ang + 90;
+        x += -Math.sin(ang * Math.PI / 180) * alt * 34; y += Math.cos(ang * Math.PI / 180) * alt * 34;
+        flag.rocket = true; bs = 30; by = 18; ny = 54;
+      } else {
+        const q = along(mapPts, t); const nx = -Math.sin(q.ang * Math.PI / 180), nyy = Math.cos(q.ang * Math.PI / 180);
+        x = q.x + nx * alt * 24; y = q.y + nyy * alt * 24 - 12; rot = q.ang * 0.25; flag.boat = true; bs = 38; by = 8; ny = alt > 0 ? 34 : -56;
+      }
+      const a = av(p.k, bs, p.m);
+      return { x: Math.round(x), y: Math.round(y), rot: Math.round(rot), sc, ny, by, bl: Math.round((80 - bs) / 2), rank: i + 1, name: p.name, delay: (i * 0.12) + 's', ...flag, ...a };
+    });
+    const rows = data.map((p, i) => ({
+      rank: i + 1, name: p.name, score: fmt(p.score), gain: p.gain ? '+' + fmt(p.gain) + ' this round' : 'no points this round',
+      up: p.d > 0, down: p.d < 0, same: p.d === 0, delta: p.d === 0 ? '0' : Math.abs(p.d),
+      chip: p.d > 0 ? '#2EE6A6' : p.d < 0 ? '#FF9AD5' : '#fff', bg: i === 0 ? '#FFF3B8' : '#fff', ...av(p.k, 46, p.m)
+    }));
+    const defs = [['summit', 'Summit'], ['gp', 'Grand Prix'], ['tour', 'Tour de Quiz'], ['moon', 'Moonshot'], ['map', 'Treasure']];
+    return {
+      t: meta[theme], markers, rows,
+      themes: defs.map(([id, label]) => ({ label, on: theme === id, bg: theme === id ? '#2B4BFF' : '#fff', ink: theme === id ? '#fff' : '#12131A', shadow: theme === id ? '3px 3px 0 #12131A' : 'none', pick: () => this.setState({ theme: id }) })),
+      isSummit: theme === 'summit', isGp: theme === 'gp', isTour: theme === 'tour', isMoon: theme === 'moon', isMap: theme === 'map',
+      summit: { trail: str(trail) }, tour: { road: str(road), ground }, map: { route }, gp: { fy: GP.cy + GP.ry - 49 }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Answer reveal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #FFD43B;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.fill{transform-origin:left;animation:fill .9s cubic-bezier(.2,.9,.3,1) both}
+</style>
+</helmet>
+<div style="width:1360px;height:820px;box-sizing:border-box;display:flex;overflow:hidden;font-family:'Instrument Sans',sans-serif;color:#12131A">
+
+  <div style="width:500px;flex:none;box-sizing:border-box;background:#2B4BFF;color:#fff;padding:40px 44px;display:flex;flex-direction:column;justify-content:space-between;border-right:3px solid #12131A">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="font-family:'DM Mono',monospace;font-size:18px;background:#fff;color:#12131A;border:2.5px solid #12131A;border-radius:12px;padding:6px 14px">Q3 / 10</span>
+      <span style="font-family:'DM Mono',monospace;font-size:16px;letter-spacing:1px;background:#12131A;color:#fff;border:2.5px solid #12131A;border-radius:12px;padding:6px 14px">TIME'S UP</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;line-height:1.05;letter-spacing:-.5px;opacity:.9">Which planet has the most known moons?</div>
+      <div style="display:flex;flex-direction:column">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:150px;line-height:.9;letter-spacing:-5px;color:#FFD43B">58%</span>
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px">of the room got it</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#fff;color:#12131A;border:3px solid #12131A;border-radius:20px;padding:12px 16px;box-shadow:5px 5px 0 #12131A">
+        <div style="position:relative;flex:none;width:{{ me.bs }}px;height:{{ me.bs }}px;box-sizing:border-box;background:{{ me.bc }};border:{{ me.bw }}px solid #12131A;border-radius:{{ me.br }}">
+          <div style="position:absolute;{{ me.eL }}"></div><div style="position:absolute;{{ me.eR }}"></div><div style="position:absolute;{{ me.mo }}"></div>
+        </div>
+        <div style="display:flex;flex-direction:column"><span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;color:#3B4152">FASTEST CORRECT</span><span style="font-weight:700;font-size:22px">Priya · 1.2 seconds</span></div>
+      </div>
+    </div>
+    <button class="btn" style="height:68px;border-radius:20px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;box-shadow:6px 6px 0 #12131A;display:flex;align-items:center;justify-content:center;gap:12px">
+      See the leaderboard
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <div style="flex:1;min-width:0;box-sizing:border-box;background:#F4F2EC;padding:36px 48px 40px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px">Saturn it is.</span>
+      <span style="font-size:15px;font-weight:600;color:#3B4152">24 answers in. Each bar is a share of the room.</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-height:0">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+        <div style="position:relative;flex:1;border:{{ r.bw }}px solid #12131A;border-radius:26px;background:#fff;box-shadow:{{ r.shadow }};overflow:hidden;display:flex;align-items:center">
+          <div class="fill" style="position:absolute;left:0;top:0;bottom:0;width:{{ r.pct }}%;background:{{ r.fill }}"></div>
+          <div style="position:relative;flex:1;display:flex;align-items:center;gap:24px;padding:0 28px 0 20px">
+            <div style="width:78px;height:78px;flex:none;border:3px solid #12131A;border-radius:18px;background:{{ r.color }};display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ r.isTri }}" hint-placeholder-val="{{ true }}"><svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 3 22 20H2z" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ r.isDia }}"><svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 2 22 12 12 22 2 12z" fill="#fff"/></svg></sc-if>
+              <sc-if value="{{ r.isCir }}"><svg width="40" height="40" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ r.isSqu }}"><svg width="40" height="40" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#12131A"/></svg></sc-if>
+            </div>
+            <span style="flex:1;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:42px">{{ r.label }}</span>
+            <sc-if value="{{ r.right }}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;align-items:center;gap:8px;background:#12131A;color:#2EE6A6;border-radius:999px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:15px;letter-spacing:1px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2EE6A6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>RIGHT</span>
+            </sc-if>
+            <span style="font-family:'DM Mono',monospace;font-size:34px;min-width:96px;text-align:right">{{ r.count }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const data = [
+      { label: 'Mars', count: 2, pct: 8, color: '#FF6A2B', fill: '#FFD2BD', k: 'isTri' },
+      { label: 'Jupiter', count: 5, pct: 21, color: '#2B4BFF', fill: '#C9D2FF', k: 'isDia' },
+      { label: 'Saturn', count: 14, pct: 58, color: '#FFD43B', fill: '#2EE6A6', k: 'isCir', right: true },
+      { label: 'Neptune', count: 3, pct: 13, color: '#2EE6A6', fill: '#BFF5E0', k: 'isSqu' }
+    ];
+    return {
+      me: av(1, 58, 'grin'),
+      rows: data.map((d) => {
+        const o = { label: d.label, count: d.count, pct: d.pct, color: d.color, fill: d.fill, right: !!d.right, bw: d.right ? 4 : 3, shadow: d.right ? '8px 8px 0 #12131A' : '5px 5px 0 #12131A', isTri: false, isDia: false, isCir: false, isSqu: false };
+        o[d.k] = true; return o;
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Enter code</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,input{font-family:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.caret{animation:blink 1s infinite}
+@keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.pk{animation:peek 3s ease-in-out infinite}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;padding:34px 24px 0;gap:26px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:36px;height:36px;border-radius:10px;background:#FF6A2B;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14L5 19h14"/></svg></div>
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.5px">quiz<span style="color:#2B4BFF">zzz</span></span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:54px;line-height:.98;letter-spacing:-1.5px">Got a code?</span>
+    <span style="font-weight:600;font-size:17px;color:#3B4152;line-height:1.35">It's on the big screen. No app, no account.</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <label for="code" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">GAME CODE</label>
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ digits }}" as="d" hint-placeholder-count="6">
+        <div style="flex:1;height:68px;border:3px solid #12131A;border-radius:16px;background:{{ d.bg }};box-shadow:{{ d.shadow }};display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:36px">
+          {{ d.v }}<sc-if value="{{ d.caret }}" hint-placeholder-val="{{ false }}"><span class="caret" style="width:3px;height:36px;background:#2B4BFF"></span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <input id="code" inputmode="numeric" aria-label="Game code" value="" style="position:absolute;width:1px;height:1px;opacity:0">
+    <button class="btn" style="margin-top:6px;height:66px;border-radius:20px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;box-shadow:5px 5px 0 #12131A;display:flex;align-items:center;justify-content:center;gap:12px">
+      Join the game
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+    </button>
+    <span style="font-size:14px;font-weight:600;color:#3B4152;text-align:center">Scanned the QR code? You're already in.</span>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;height:200px">
+    <sc-for list="{{ peeks }}" as="p" hint-placeholder-count="4">
+      <div class="pk" style="position:absolute;left:{{ p.x }}px;bottom:{{ p.y }}px;width:{{ p.bs }}px;height:{{ p.bs }}px;box-sizing:border-box;background:{{ p.bc }};border:{{ p.bw }}px solid #12131A;border-radius:{{ p.br }};animation-delay:{{ p.delay }}">
+        <div style="position:absolute;{{ p.eL }}"></div><div style="position:absolute;{{ p.eR }}"></div><div style="position:absolute;{{ p.mo }}"></div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const typed = '83920';
+    const digits = [0, 1, 2, 3, 4, 5].map((i) => ({ v: typed[i] || '', caret: i === typed.length, bg: i === typed.length ? '#fff' : '#fff', shadow: i === typed.length ? '4px 4px 0 #2B4BFF' : '3px 3px 0 #12131A' }));
+    const peeks = [
+      { x: -20, y: -40, k: 0, s: 120, m: 'grin', delay: '0s' }, { x: 80, y: -70, k: 1, s: 110, m: 'o', delay: '.5s' },
+      { x: 175, y: -40, k: 2, s: 120, m: 'smile', delay: '1s' }, { x: 280, y: -64, k: 3, s: 120, m: 'grin', delay: '1.5s' }
+    ].map((p) => ({ x: p.x, y: p.y, delay: p.delay, ...av(p.k, p.s, p.m) }));
+    return { digits, peeks };
+  }
+}
+</script>
+</body>
+</html>

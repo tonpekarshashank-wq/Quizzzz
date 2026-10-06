@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design language</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+</style>
+</helmet>
+<div style="width:1360px;height:820px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;padding:34px 48px 36px;gap:22px;overflow:hidden">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:56px;height:56px;border-radius:16px;background:#FF6A2B;border:3px solid #12131A;display:flex;align-items:center;justify-content:center;box-shadow:4px 4px 0 #12131A"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14L5 19h14"/></svg></div>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:56px;letter-spacing:-1.5px;line-height:1">quiz<span style="color:#2B4BFF">zzz</span></span>
+    </div>
+    <span style="font-family:'DM Mono',monospace;font-size:14px;letter-spacing:2px;color:#3B4152">DESIGN LANGUAGE · STICKERS, TICKETS AND BLOBS</span>
+  </div>
+
+  <div style="display:flex;gap:14px">
+    <sc-for list="{{ colors }}" as="c" hint-placeholder-count="8">
+      <div style="flex:1;border:3px solid #12131A;border-radius:20px;overflow:hidden;background:#fff;box-shadow:4px 4px 0 #12131A">
+        <div style="height:92px;background:{{ c.hex }};border-bottom:3px solid #12131A"></div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:1px">
+          <span style="font-weight:700;font-size:15px">{{ c.name }}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:#3B4152">{{ c.hex }}</span>
+          <span style="font-size:12px;font-weight:600;color:#3B4152;line-height:1.3">{{ c.role }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="flex:1;display:flex;gap:22px;min-height:0">
+    <div style="flex:1.1;border:3px solid #12131A;border-radius:24px;background:#fff;padding:22px 26px;display:flex;flex-direction:column;gap:10px;box-shadow:5px 5px 0 #12131A">
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">TYPE</span>
+      <div style="display:flex;align-items:baseline;gap:18px"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:76px;line-height:.95;letter-spacing:-2px">Aa</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;line-height:1.1">Bricolage Grotesque 800<br><span style="font-weight:600;font-size:15px;color:#3B4152">Questions, headlines, big moments</span></span></div>
+      <div style="display:flex;align-items:baseline;gap:18px"><span style="font-family:'DM Mono',monospace;font-size:44px;line-height:1">839 201</span><span style="font-family:'DM Mono',monospace;font-size:20px;line-height:1.2">DM Mono<br><span style="font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:15px;color:#3B4152">Codes, scores, timers</span></span></div>
+      <div style="display:flex;align-items:baseline;gap:18px"><span style="font-family:'Instrument Sans',sans-serif;font-weight:700;font-size:34px;line-height:1">Instrument Sans</span><span style="font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:15px;color:#3B4152">Interface and body</span></div>
+    </div>
+
+    <div style="flex:1;border:3px solid #12131A;border-radius:24px;background:#fff;padding:22px 26px;display:flex;flex-direction:column;gap:14px;box-shadow:5px 5px 0 #12131A">
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">THE BLOBS · EVERY PLAYER'S CHARACTER</span>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex:1">
+        <sc-for list="{{ blobs }}" as="b" hint-placeholder-count="6">
+          <div style="position:relative;width:{{ b.bs }}px;height:{{ b.bs }}px;box-sizing:border-box;background:{{ b.bc }};border:{{ b.bw }}px solid #12131A;border-radius:{{ b.br }}">
+            <div style="position:absolute;{{ b.eL }}"></div><div style="position:absolute;{{ b.eR }}"></div><div style="position:absolute;{{ b.mo }}"></div>
+          </div>
+        </sc-for>
+      </div>
+      <span style="font-size:14px;font-weight:600;color:#3B4152;line-height:1.4">Blobs show up in the lobby, race on the leaderboard and get a winner card at the end.</span>
+    </div>
+
+    <div style="flex:1;border:3px solid #12131A;border-radius:24px;background:#fff;padding:22px 26px;display:flex;flex-direction:column;gap:14px;box-shadow:5px 5px 0 #12131A">
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:#3B4152">ANSWER KEYS · COLOR PLUS SHAPE</span>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1;aspect-ratio:1;border:3px solid #12131A;border-radius:16px;background:#FF6A2B;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 3 22 20H2z" fill="#12131A"/></svg></div>
+        <div style="flex:1;aspect-ratio:1;border:3px solid #12131A;border-radius:16px;background:#2B4BFF;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 2 22 12 12 22 2 12z" fill="#fff"/></svg></div>
+        <div style="flex:1;aspect-ratio:1;border:3px solid #12131A;border-radius:16px;background:#FFD43B;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#12131A"/></svg></div>
+        <div style="flex:1;aspect-ratio:1;border:3px solid #12131A;border-radius:16px;background:#2EE6A6;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#12131A"/></svg></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:auto">
+        <button class="btn" style="height:50px;padding:0 22px;border-radius:14px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;box-shadow:4px 4px 0 #12131A">Primary</button>
+        <button class="btn" style="height:50px;padding:0 22px;border-radius:14px;border:3px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:16px;box-shadow:4px 4px 0 #12131A">Secondary</button>
+      </div>
+      <span style="font-size:14px;font-weight:600;color:#3B4152;line-height:1.4">3px ink outline, hard shadow, and buttons press down into it.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const ms = ['grin', 'smile', 'o', 'grin', 'smile', 'o'];
+    return {
+      colors: [
+        { name: 'Ink', hex: '#12131A', role: 'Outlines, text, shadows' },
+        { name: 'Chalk', hex: '#F4F2EC', role: 'Ground' },
+        { name: 'Cobalt', hex: '#2B4BFF', role: 'Stage, focus, selection' },
+        { name: 'Tangerine', hex: '#FF6A2B', role: 'Primary action' },
+        { name: 'Sun', hex: '#FFD43B', role: 'Points, timers, bonuses' },
+        { name: 'Mint', hex: '#2EE6A6', role: 'Correct, rank up' },
+        { name: 'Bubblegum', hex: '#FF9AD5', role: 'Wrong, rank down' },
+        { name: 'Sky', hex: '#8FD3FF', role: 'Support' }
+      ],
+      blobs: [0, 1, 2, 3, 4, 5].map((k, i) => av(k, 76, ms[i]))
+    };
+  }
+}
+</script>
+</body>
+</html>

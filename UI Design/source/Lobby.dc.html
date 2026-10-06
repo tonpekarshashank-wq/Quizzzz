@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Host lobby</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes drop{0%{transform:translateY(-120px) scale(.6);opacity:0}60%{transform:translateY(8px) scale(1.05);opacity:1}100%{transform:none;opacity:1}}
+.pl{animation:bob 2.8s ease-in-out infinite}
+.pl:nth-child(2n){animation-delay:.6s}
+.pl:nth-child(3n){animation-delay:1.3s}
+.fresh{animation:drop .7s ease-out both}
+</style>
+</helmet>
+<div style="width:1360px;height:820px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;padding:28px 44px 32px;gap:26px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;border-radius:11px;background:#FF6A2B;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14L5 19h14"/></svg></div>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-.5px">quiz<span style="color:#2B4BFF">zzz</span></span>
+      <span style="margin-left:12px;font-weight:700;font-size:17px;border:2.5px solid #12131A;border-radius:999px;padding:6px 16px;background:#fff">Friday Tech Trivia · 10 questions</span>
+    </div>
+    <button class="btn" style="height:44px;padding:0 20px;border-radius:14px;border:2.5px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:15px;box-shadow:3px 3px 0 #12131A">Cancel game</button>
+  </div>
+
+  <div style="position:relative;flex:none;height:250px;display:flex;border:3px solid #12131A;border-radius:30px;background:#fff;box-shadow:8px 8px 0 #12131A">
+    <div style="width:300px;flex:none;background:#FF6A2B;border-radius:27px 0 0 27px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+      <div style="background:#fff;border:3px solid #12131A;border-radius:16px;padding:10px">
+        <div style="display:grid;grid-template-columns:repeat(21, 7px);grid-auto-rows:7px">
+          <sc-for list="{{ qr }}" as="c" hint-placeholder-count="21">
+            <div style="background:{{ c.bg }}"></div>
+          </sc-for>
+        </div>
+      </div>
+      <span style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px">SCAN WITH CAMERA</span>
+    </div>
+    <div style="position:absolute;left:284px;top:-19px;width:32px;height:32px;box-sizing:border-box;border-radius:50%;background:#F4F2EC;border:3px solid #12131A;clip-path:inset(50% 0 0 0)"></div>
+    <div style="position:absolute;left:300px;top:14px;bottom:14px;border-left:3px dashed #12131A"></div>
+    <div style="position:absolute;left:284px;bottom:-19px;width:32px;height:32px;box-sizing:border-box;border-radius:50%;background:#F4F2EC;border:3px solid #12131A;clip-path:inset(0 0 50% 0)"></div>
+    <div style="flex:1;min-width:0;padding:26px 40px;display:flex;align-items:center;justify-content:space-between;gap:30px">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-family:'DM Mono',monospace;font-size:16px;letter-spacing:2px;color:#3B4152">GO TO <b style="color:#12131A">QUIZZZZ.APP</b> AND ENTER</span>
+        <span style="font-family:'DM Mono',monospace;font-weight:500;font-size:168px;line-height:1;letter-spacing:-4px">839 201</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-end">
+        <div style="border:2.5px solid #12131A;border-radius:18px;background:#FFD43B;padding:10px 20px;text-align:center;transform:rotate(3deg)">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:56px;line-height:1">{{ total }}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px">PLAYERS IN</div>
+        </div>
+        <button class="btn" style="height:46px;padding:0 18px;border-radius:14px;border:2.5px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:15px;box-shadow:3px 3px 0 #12131A;display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px">Who's here</span>
+      <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;border:2.5px solid #12131A;border-radius:999px;background:#fff;padding:6px 14px"><span style="width:10px;height:10px;border-radius:50%;background:#2EE6A6;border:2px solid #12131A"></span>Maya just joined</span>
+    </div>
+    <div style="flex:1;display:flex;flex-wrap:wrap;gap:14px 20px;align-content:flex-start;overflow:hidden;padding-top:8px">
+      <sc-for list="{{ players }}" as="p" hint-placeholder-count="12">
+        <div class="pl {{ p.cls }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:88px">
+          <div style="position:relative;flex:none;width:{{ p.bs }}px;height:{{ p.bs }}px;box-sizing:border-box;background:{{ p.bc }};border:{{ p.bw }}px solid #12131A;border-radius:{{ p.br }}">
+            <div style="position:absolute;{{ p.eL }}"></div><div style="position:absolute;{{ p.eR }}"></div><div style="position:absolute;{{ p.mo }}"></div>
+          </div>
+          <span style="font-weight:700;font-size:14px;background:#fff;border:2px solid #12131A;border-radius:999px;padding:2px 10px;max-width:88px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span>
+        </div>
+      </sc-for>
+      <div style="align-self:center;font-family:'DM Mono',monospace;font-size:15px;color:#3B4152;padding:0 8px">+ {{ more }} more</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+      <span style="font-weight:600;font-size:15px;color:#3B4152;max-width:460px;line-height:1.4">Tap a blob to remove a player. Everyone picks a character on their phone.</span>
+      <button class="btn" style="height:72px;padding:0 44px;border-radius:20px;border:3px solid #12131A;background:#FF6A2B;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:32px;box-shadow:6px 6px 0 #12131A;display:flex;align-items:center;gap:14px">
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M6 3 21 12 6 21z" fill="#12131A"/></svg>Start game
+      </button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const INK = '#12131A';
+    const BL = [{ c: '#FF6A2B', r: '50%' }, { c: '#FF9AD5', r: '38% 62% 63% 37% / 41% 44% 56% 59%' }, { c: '#2B4BFF', r: '30%', ink: '#fff' }, { c: '#FFD43B', r: '50% 50% 18% 50%' }, { c: '#2EE6A6', r: '62% 38% 46% 54% / 55% 60% 40% 45%' }, { c: '#8FD3FF', r: '50% 50% 50% 14%' }];
+    const av = (k, s, m) => {
+      const b = BL[k % 6], ink = b.ink || INK, bw = Math.max(2, Math.round(s / 22)), e = Math.round(s * 0.13);
+      const eye = (side) => side + ':' + Math.round(s * 0.24) + 'px;top:' + Math.round(s * 0.34) + 'px;width:' + e + 'px;height:' + e + 'px;border-radius:50%;background:' + ink;
+      const mw = Math.round(s * 0.3), mh = Math.round(s * 0.15), top = Math.round(s * 0.56);
+      let mo = 'left:50%;transform:translateX(-50%);top:' + top + 'px;';
+      if (m === 'o') mo += 'width:' + mh + 'px;height:' + mh + 'px;border-radius:50%;background:' + ink;
+      else if (m === 'grin') mo += 'width:' + mw + 'px;height:' + mh + 'px;border-radius:0 0 999px 999px;background:' + ink;
+      else mo += 'width:' + mw + 'px;height:' + mh + 'px;border:' + bw + 'px solid ' + ink + ';border-top:0;border-radius:0 0 999px 999px';
+      return { bs: s, bc: b.c, br: b.r, bw, eL: eye('left'), eR: eye('right'), mo };
+    };
+    const names = ['Maya', 'Priya', 'Dev_42', 'Luis', 'TheBigQ', 'Captain Ana', 'Zoe', 'Noor', 'Kenji', 'Sam', 'Ivy', 'Rohan', 'Tess', 'Omar', 'Bea', 'Leo', 'Nia', 'Hugo'];
+    const mouths = ['smile', 'grin', 'o'];
+    const players = names.map((name, i) => ({ name, cls: i === 0 ? 'fresh' : '', ...av(i + (i > 5 ? 2 : 0), 64, mouths[i % 3]) }));
+    const N = 21, grid = [];
+    const finder = (r, c, r0, c0) => { const a = r - r0, b = c - c0; if (a < 0 || a > 6 || b < 0 || b > 6) return null; return a === 0 || a === 6 || b === 0 || b === 6 || (a >= 2 && a <= 4 && b >= 2 && b <= 4); };
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      let v = finder(r, c, 0, 0); if (v === null) v = finder(r, c, 0, 14); if (v === null) v = finder(r, c, 14, 0);
+      const sep = (r < 8 && c < 8) || (r < 8 && c > 12) || (r > 12 && c < 8);
+      if (v === null) v = sep ? false : (((r * 7 + c * 13 + r * c) % 5) < 2);
+      grid.push({ bg: v ? INK : '#fff' });
+    }
+    return { players, qr: grid, total: 24, more: 6 };
+  }
+}
+</script>
+</body>
+</html>

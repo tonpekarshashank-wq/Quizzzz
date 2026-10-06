@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiz builder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.btn{transition:transform .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+.row:hover{transform:translateY(-2px)}
+.row{transition:transform .12s}
+</style>
+</helmet>
+<div style="width:1360px;height:820px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div style="height:72px;flex:none;display:flex;align-items:center;gap:20px;padding:0 28px;border-bottom:2.5px solid #12131A;background:#fff">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:38px;height:38px;border-radius:11px;background:#FF6A2B;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14L5 19h14"/></svg></div>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-.5px">quiz<span style="color:#2B4BFF">zzz</span></span>
+    </div>
+    <div style="width:2.5px;height:30px;background:#12131A"></div>
+    <label style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;color:#5A5F6E">QUIZ NAME</span>
+      <input value="Friday Tech Trivia" aria-label="Quiz name" style="background:transparent;border:0;color:#12131A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;padding:0;width:100%">
+    </label>
+    <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#3B4152">
+      <span style="width:10px;height:10px;border-radius:50%;background:#2EE6A6;border:2px solid #12131A"></span>Autosaved
+    </div>
+    <button class="btn" style="height:46px;padding:0 20px;border-radius:14px;border:2.5px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:16px;box-shadow:3px 3px 0 #12131A">Share as draft</button>
+    <button class="btn" style="height:46px;padding:0 24px;border-radius:14px;border:2.5px solid #12131A;background:#FF6A2B;color:#12131A;font-weight:700;font-size:17px;box-shadow:4px 4px 0 #12131A;display:flex;align-items:center;gap:10px">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 3 21 12 6 21z" fill="#12131A"/></svg>Go live
+    </button>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0">
+
+    <div style="flex:1;min-width:0;box-sizing:border-box;padding:24px 36px 20px 40px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px">{{ count }} questions</span>
+        <span style="font-family:'DM Mono',monospace;font-size:13px;color:#3B4152">about {{ mins }} min · up to {{ maxPts }} pts each player</span>
+      </div>
+
+      <sc-for list="{{ qs }}" as="q" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column">
+          <sc-if value="{{ q.closed }}" hint-placeholder-val="{{ false }}">
+            <div class="row" style="display:flex;align-items:center;gap:8px">
+              <button onClick="{{ q.select }}" aria-label="Edit question {{ q.num }}" style="flex:1;min-width:0;height:58px;border-radius:16px;border:2.5px solid #12131A;background:#fff;color:#12131A;display:flex;align-items:center;gap:14px;padding:0 14px;text-align:left">
+                <span style="flex:none;width:34px;height:34px;border-radius:10px;border:2.5px solid #12131A;background:{{ q.tint }};font-family:'DM Mono',monospace;font-weight:500;font-size:16px;display:flex;align-items:center;justify-content:center">{{ q.num }}</span>
+                <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:16px">{{ q.prompt }}</span>
+                <span style="flex:none;font-family:'DM Mono',monospace;font-size:13px;background:#F4F2EC;border-radius:8px;padding:4px 8px">{{ q.time }}s</span>
+                <span style="flex:none;font-family:'DM Mono',monospace;font-size:13px;background:#FFD43B;border-radius:8px;padding:4px 8px">{{ q.mult }}</span>
+              </button>
+              <button onClick="{{ q.up }}" aria-label="Move question {{ q.num }} up" style="flex:none;width:34px;height:34px;border-radius:10px;border:2.5px solid #12131A;background:#fff;padding:0;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
+              <button onClick="{{ q.down }}" aria-label="Move question {{ q.num }} down" style="flex:none;width:34px;height:34px;border-radius:10px;border:2.5px solid #12131A;background:#fff;padding:0;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ q.open }}">
+            <div style="border:2.5px solid #12131A;border-radius:22px;background:#fff;box-shadow:5px 5px 0 #2B4BFF;padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="width:34px;height:34px;border-radius:10px;border:2.5px solid #12131A;background:#2B4BFF;color:#fff;font-family:'DM Mono',monospace;font-size:16px;display:flex;align-items:center;justify-content:center">{{ q.num }}</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:1px">{{ q.kind }}</span>
+                </div>
+                <span style="font-family:'DM Mono',monospace;font-size:13px;color:#3B4152">{{ q.chars }}/250</span>
+              </div>
+              <textarea value="{{ q.prompt }}" onChange="{{ q.setPrompt }}" aria-label="Question prompt" rows="2" style="resize:none;border:0;border-bottom:3px solid #12131A;background:#F4F2EC;border-radius:12px 12px 0 0;padding:10px 14px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;line-height:1.15;color:#12131A;width:100%;box-sizing:border-box"></textarea>
+              <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px">
+                <sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="4">
+                  <div style="border:2.5px solid #12131A;border-radius:16px;background:{{ o.bg }};display:flex;align-items:center;gap:10px;padding:8px">
+                    <div style="flex:none;width:38px;height:38px;border-radius:10px;border:2.5px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                      <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3 22 20H2z" fill="#12131A"/></svg></sc-if>
+                      <sc-if value="{{ o.isDia }}"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2 22 12 12 22 2 12z" fill="#fff"/></svg></sc-if>
+                      <sc-if value="{{ o.isCir }}"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#12131A"/></svg></sc-if>
+                      <sc-if value="{{ o.isSqu }}"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#12131A"/></svg></sc-if>
+                    </div>
+                    <input value="{{ o.label }}" onChange="{{ o.edit }}" aria-label="Answer {{ o.n }}" style="flex:1;min-width:0;background:transparent;border:0;font-family:'Instrument Sans',sans-serif;font-weight:700;font-size:17px;color:#12131A;padding:6px 0">
+                    <button onClick="{{ o.mark }}" aria-label="Mark answer {{ o.n }} as correct" aria-pressed="{{ o.isCorrect }}" style="flex:none;height:34px;padding:0 12px;border-radius:999px;border:2.5px solid #12131A;background:{{ o.tbg }};color:#12131A;font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>{{ o.tlabel }}
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:22px;align-items:flex-end">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;color:#3B4152">TIME</span>
+                  <div style="display:flex;border:2.5px solid #12131A;border-radius:12px;overflow:hidden">
+                    <sc-for list="{{ q.times }}" as="t" hint-placeholder-count="6">
+                      <button onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" style="height:38px;min-width:44px;padding:0 8px;border:0;border-right:2px solid #12131A;background:{{ t.bg }};color:{{ t.ink }};font-family:'DM Mono',monospace;font-size:14px">{{ t.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;color:#3B4152">POINTS</span>
+                  <div style="display:flex;border:2.5px solid #12131A;border-radius:12px;overflow:hidden">
+                    <sc-for list="{{ q.pts }}" as="p" hint-placeholder-count="3">
+                      <button onClick="{{ p.pick }}" aria-pressed="{{ p.on }}" style="height:38px;padding:0 14px;border:0;border-right:2px solid #12131A;background:{{ p.bg }};color:{{ p.ink }};font-family:'Instrument Sans',sans-serif;font-weight:700;font-size:14px">{{ p.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn" onClick="{{ addMc }}" style="flex:1;height:50px;border-radius:14px;border:2.5px dashed #12131A;background:transparent;color:#12131A;font-weight:700;font-size:15px">+ Multiple choice</button>
+        <button class="btn" onClick="{{ addTf }}" style="flex:1;height:50px;border-radius:14px;border:2.5px dashed #12131A;background:transparent;color:#12131A;font-weight:700;font-size:15px">+ True / False</button>
+      </div>
+    </div>
+
+    <div style="width:430px;flex:none;box-sizing:border-box;background:#2B4BFF;border-left:2.5px solid #12131A;display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px 0 0;overflow:hidden">
+      <span style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1.5px;color:#fff">LIVE PREVIEW · WHAT PLAYERS SEE</span>
+      <div style="width:290px;height:640px;flex:none;box-sizing:border-box;border:4px solid #12131A;border-radius:38px 38px 0 0;background:#F4F2EC;padding:18px 14px;display:flex;flex-direction:column;gap:12px;box-shadow:6px 6px 0 #12131A">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-family:'DM Mono',monospace;font-size:13px;background:#fff;border:2px solid #12131A;border-radius:8px;padding:3px 8px">Q{{ cur.num }}/{{ count }}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;background:#FFD43B;border:2px solid #12131A;border-radius:8px;padding:3px 8px">{{ cur.mult }}</span>
+        </div>
+        <div style="height:12px;border-radius:999px;border:2px solid #12131A;background:#fff;overflow:hidden"><div style="width:72%;height:100%;background:#FF6A2B;border-right:2px solid #12131A"></div></div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;line-height:1.15;padding:4px 2px 2px">{{ cur.prompt }}</div>
+        <sc-for list="{{ prev }}" as="o" hint-placeholder-count="4">
+          <div style="border:2.5px solid #12131A;border-radius:14px;background:#fff;box-shadow:3px 3px 0 #12131A;display:flex;align-items:center;gap:10px;padding:8px 10px">
+            <div style="flex:none;width:30px;height:30px;border-radius:8px;border:2px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3 22 20H2z" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ o.isDia }}"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2 22 12 12 22 2 12z" fill="#fff"/></svg></sc-if>
+              <sc-if value="{{ o.isCir }}"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#12131A"/></svg></sc-if>
+              <sc-if value="{{ o.isSqu }}"><svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#12131A"/></svg></sc-if>
+            </div>
+            <span style="font-weight:700;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      sel: 0,
+      qs: [
+        { prompt: 'Which protocol keeps phones and the big screen in sync in real time?', kind: 'mc', time: 30, pts: 1000, correct: 1, opts: ['HTTP/1.1', 'WebSockets', 'FTP', 'SMTP'] },
+        { prompt: 'A Redis sorted set is a great fit for live leaderboards.', kind: 'tf', time: 20, pts: 1000, correct: 0, opts: ['True', 'False'] },
+        { prompt: 'Which planet has the most known moons?', kind: 'mc', time: 30, pts: 2000, correct: 2, opts: ['Mars', 'Jupiter', 'Saturn', 'Neptune'] },
+        { prompt: 'What is the capital of Australia?', kind: 'mc', time: 20, pts: 1000, correct: 2, opts: ['Sydney', 'Melbourne', 'Canberra', 'Perth'] }
+      ]
+    };
+  }
+  renderVals() {
+    const S = this.state, qs = S.qs, sel = S.sel, cur = qs[sel];
+    const fmt = (n) => n.toLocaleString('en-US');
+    const upd = (fn) => { const next = qs.map((q) => ({ ...q, opts: [...q.opts] })); fn(next); this.setState({ qs: next }); };
+    const palette = [['#FF6A2B', 'isTri'], ['#2B4BFF', 'isDia'], ['#FFD43B', 'isCir'], ['#2EE6A6', 'isSqu']];
+    const tints = ['#FF9AD5', '#8FD3FF', '#FFD43B', '#2EE6A6'];
+    const multLabel = (p) => (p === 0 ? '0 pts' : p === 2000 ? '2× pts' : '1× pts');
+    const move = (i, d) => () => { const j = i + d; if (j < 0 || j >= qs.length) return; const next = qs.slice(); const t = next[i]; next[i] = next[j]; next[j] = t; this.setState({ qs: next, sel: sel === i ? j : (sel === j ? i : sel) }); };
+    const optsOf = (q, withHandlers) => q.opts.map((label, i) => {
+      const pi = q.kind === 'tf' ? (i === 0 ? 1 : 0) : i;
+      const o = { n: i + 1, label, color: palette[pi][0] };
+      ['isTri', 'isDia', 'isCir', 'isSqu'].forEach((k) => { o[k] = palette[pi][1] === k; });
+      if (withHandlers) {
+        const on = q.correct === i;
+        o.isCorrect = on; o.bg = on ? '#CFFAE8' : '#fff'; o.tbg = on ? '#2EE6A6' : '#fff'; o.tlabel = on ? 'Correct' : 'Mark';
+        o.edit = (e) => upd((n) => { n[sel].opts[i] = e.target.value; });
+        o.mark = () => upd((n) => { n[sel].correct = i; });
+      }
+      return o;
+    });
+    const total = qs.reduce((a, q) => a + q.pts, 0);
+    return {
+      count: qs.length, mins: Math.max(1, Math.round(qs.reduce((a, q) => a + q.time + 8, 0) / 60)), maxPts: fmt(total),
+      qs: qs.map((q, i) => ({
+        num: i + 1, prompt: q.prompt, time: q.time, mult: multLabel(q.pts), tint: tints[i % 4],
+        open: i === sel, closed: i !== sel, select: () => this.setState({ sel: i }), up: move(i, -1), down: move(i, 1),
+        kind: q.kind === 'tf' ? 'TRUE / FALSE' : 'MULTIPLE CHOICE', chars: q.prompt.length,
+        setPrompt: (e) => upd((n) => { n[i].prompt = e.target.value.slice(0, 250); }),
+        opts: i === sel ? optsOf(q, true) : [],
+        times: i === sel ? [10, 20, 30, 60, 90, 120].map((t) => ({ label: t + 's', on: q.time === t, bg: q.time === t ? '#2B4BFF' : '#fff', ink: q.time === t ? '#fff' : '#12131A', pick: () => upd((n) => { n[i].time = t; }) })) : [],
+        pts: i === sel ? [['Standard', 1000], ['Double', 2000], ['None', 0]].map(([label, v]) => ({ label, on: q.pts === v, bg: q.pts === v ? '#2B4BFF' : '#fff', ink: q.pts === v ? '#fff' : '#12131A', pick: () => upd((n) => { n[i].pts = v; }) })) : []
+      })),
+      cur: { num: sel + 1, prompt: cur.prompt, mult: multLabel(cur.pts) },
+      prev: optsOf(cur, false),
+      addMc: () => this.setState({ qs: [...qs, { prompt: 'Type your next question', kind: 'mc', time: 30, pts: 1000, correct: 0, opts: ['Answer one', 'Answer two', 'Answer three', 'Answer four'] }], sel: qs.length }),
+      addTf: () => this.setState({ qs: [...qs, { prompt: 'Type a statement for players to judge', kind: 'tf', time: 20, pts: 1000, correct: 0, opts: ['True', 'False'] }], sel: qs.length })
+    };
+  }
+}
+</script>
+</body>
+</html>
