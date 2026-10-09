@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.env*
+!.env.example
+.data/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
+
+# Generated durable-workflow routes and local runtime
+src/app/.well-known/workflow/
+.workflow-data/
+/.swc

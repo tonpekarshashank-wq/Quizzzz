@@ -1,3 +1,5 @@
+> Stage 1: [responsive and error-state supplement](stage-1-ux.md) and [revised PRD](../quiz-platform-mvp-prd.md) govern actual behavior. Samples below are visual references.
+
 # Screens
 
 All sample data is invented. Host screens are 1360×820 reference; phone screens are 390×844. Corresponding PRD sections are in brackets.
@@ -22,7 +24,7 @@ Room states from the PRD map to screens like this:
 
 **Layout:** top bar; center column of question cards; right-hand cobalt panel with a live phone preview.
 
-- **Top bar:** logo, quiz name input (1–120 chars), "Autosaved" indicator, "Share as draft", primary **Go live**.
+- **Top bar:** logo, quiz name input (1–120 chars), "Autosaved" indicator, primary **Go live**.
 - **Header row:** "N questions", plus an estimate ("about 3 min · up to 6,000 pts each player").
 - **Question cards:** one card is **open** (expanded) at a time; others are collapsed rows.
   - Collapsed row: number badge, prompt (single line, ellipsis), time chip, points chip, up/down reorder buttons. Click to open.
@@ -100,7 +102,7 @@ The PRD says the leaderboard shows the top 5, so five blobs are drawn.
 
 "Got a code?" headline, six digit boxes (typed digits in mono, a blinking caret on the next empty box), **Join the game**, and a note that a scanned QR code skips this screen. Blobs peek from the bottom edge. A hidden numeric input drives the boxes (open the numeric keypad on mobile).
 
-**Errors to design:** unknown or ended PIN, game already started, rate limit (10 requests per IP per minute).
+**Errors to design:** unknown or ended PIN, game already started, configurable rate limit (see PRD section 9).
 
 ### 8. Make your blob (`PhoneName.dc.html`) [FR-2 guest registration]
 
@@ -130,13 +132,13 @@ The sample shows a different player (sky blob) than the correct screen because i
 
 - Header "GAME OVER · {quiz title}" and "You finished 2nd!" (the headline adapts: "You won!" for 1st, "You finished Nth!" otherwise).
 - A **player card**, same family as the host winner cards: place and "/N players" in mono, a "TOP n%" tag, the player's hopping blob, nickname, score, and a 3-up stat grid (**accuracy, average time, best streak**). Card fill by place: 1st sun, 2nd sky, 3rd bubblegum, everyone else white. It tilts −2° and rises in. Confetti falls for ranks 1 to 3 only.
-- **Award sticker** if the player earned one (Speed Demon, Hot Streak, Comeback Kid); hidden otherwise.
+- **Award stickers** if the player earned any (Speed Demon, Hot Streak, Comeback Kid); hidden otherwise.
 - **Ease rating:** "How easy was it to join and play?" with 1 to 5 buttons (PRD KPI, target 4.5 or higher). The selected value is sun; the sample shows 5.
-- **Save my card** (primary): saves the card as an image through the share sheet. **Join another game** returns to Enter code.
+- **Save my card** (primary): generates a PNG for local download, with mobile save/share fallback. **Join another game** returns to Enter code.
 
-**Data:** final rank, player count, percentile, score, accuracy, average response ms, best streak, optional award, quiz title. The percentile is `ceil(rank / playerCount × 100)`.
+**Data:** final rank, player count, percentile, score, accuracy, average response ms, best streak, awards array, quiz title. The percentile is `ceil(rank / playerCount × 100)`.
 
-**Edge cases to build:** ranks 4 and below (white card, no confetti); a tie (show the shared rank); a player who disconnected before the end (show their last known rank); zero correct answers (accuracy 0%, no award, keep the tone kind).
+**Edge cases to build:** ranks 4 and below (white card, no confetti); equal points (show distinct ranks using the PRD comparator); a player who disconnected before the end (show their final server-computed rank); zero correct answers (accuracy 0%, no award, keep the tone kind).
 
 ---
 

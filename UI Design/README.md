@@ -2,6 +2,10 @@
 
 UI design for the Live Quiz & Assessment Platform MVP described in [`../quiz-platform-mvp-prd.md`](../quiz-platform-mvp-prd.md).
 
+## Stage 1 update
+
+The [revised PRD](../quiz-platform-mvp-prd.md), [technical contracts](../docs/technical-contracts.md), and [responsive/error UX specification](stage-1-ux.md) settle mobile hosting, ranking, recovery and API behavior. Artboard sources remain unchanged visual references with fictional data.
+
 ## Concept
 
 A light, tactile **"stickers, tickets and blobs"** look: chalk ground, 3px ink outlines, hard offset shadows, and a small set of loud colors. Every player gets a **blob** character that appears in the lobby, races on the leaderboard and gets a winner card at the end. That character is the core of the gamification.

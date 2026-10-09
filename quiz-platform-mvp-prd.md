@@ -1,3 +1,5 @@
+> Revised 2026-10-07 for Stage 1. Section 9 and the linked technical/UX contracts settle the updated MVP rules and take precedence over illustrative descriptions. Artboard data is fictional.
+
 # Product Requirement Document: Live Quiz & Assessment Platform MVP
 
 ## 1. Document Overview & Product Vision
@@ -19,23 +21,11 @@ The initial platform build targets three core user personas across education, co
 
 ## 2. System Architecture & High-Level User Workflows
 
-### 2.1 Technical Architecture Overview
-The platform operates as a modern single-page web application backed by a real-time event-driven backend. The system comprises four primary architectural layers designed to ensure sub-200ms latency between the presenter display and mobile participants:
+### 2.1 Vercel architecture
 
-*   **Presenter Web UI**: React and Next.js single-page application providing the quiz authoring suite and the live hosting control dashboard.
-*   **Participant Mobile Client**: Lightweight, mobile-first Progressive Web App optimized for mobile browser execution, rendering live questions, interactive answer buttons, and rank feedback.
-*   **Real-Time State Gateway**: Node.js backend managing persistent WebSocket connections and Server-Sent Events (SSE) for real-time game state broadcasting.
-*   **Database & Session Store**: PostgreSQL relational database for persistent user accounts, quiz definitions, and historical reports, paired with Redis for in-memory live session state, participant lobbies, and real-time leaderboard aggregation.
+Next.js/TypeScript hosts both desktop and mobile host/player experiences on Vercel Free. Vercel APIs own authentication, commands, answer validation and scoring. Ably provides managed realtime delivery with scoped room/private-channel tokens; players cannot publish authoritative events. Neon PostgreSQL is the durable source of truth; Upstash Redis caches snapshots/PIN lookups and provides configurable abuse limits. Durable deadline/inactivity jobs initially use Vercel Workflows, subject to integration timing validation. No correctness depends on a browser timer, process memory, or serverless setTimeout.
 
-The structural interaction between these system components is detailed in the architecture summary below:
-
-| System Layer | Core Technology | Primary Responsibility |
-| :--- | :--- | :--- |
-| **Presenter Dashboard** | React / Next.js SPA | Quiz authoring, room creation, state orchestration, live leaderboard projection |
-| **Participant Client** | Mobile PWA (React) | Instant room entry, single-tap answer submission, real-time feedback rendering |
-| **Real-Time Gateway** | Node.js / WebSockets | Bi-directional state broadcasting, timer synchronization, heartbeats |
-| **In-Memory Session Cache** | Redis | Ephemeral session state, active PIN registry, atomic score aggregation |
-| **Relational Database** | PostgreSQL | User accounts, quiz definitions, historical session logs, CSV export records |
+User imports GitHub into Vercel. Neon, Ably and Redis accounts will be configured later. Prefer available APJ regions and colocate compute/database. Free plans are development/pilot choices, not proof of 500-player capacity. Validate provider quotas and concurrent rooms before release.
 
 ### 2.2 Host User Journey
 The presenter workflow follows a four-stage linear progression from quiz authoring to post-game analysis:
@@ -50,7 +40,7 @@ The audience workflow eliminates entry friction by enabling immediate participat
 
 > **Participant Onboarding Pipeline**
 >
-> **Step 1: Multi-Channel Entry** \\(\rightarrow\\) Participant scans the display QR code, clicks a shared URL link (`https://app.quiz.com/join/839201`), or navigates to `app.quiz.com` and inputs the 6-digit PIN.
+> **Step 1: Multi-Channel Entry** \\(\rightarrow\\) Participant scans the display QR code, clicks a shared URL link (`https://app.quiz.com/join?pin=839201`), or navigates to `app.quiz.com` and inputs the 6-digit PIN.
 >
 > **Step 2: Nickname Registration** \\(\rightarrow\\) Participant enters a display nickname (1–25 characters) and receives an automated session token without account sign-up.
 >
@@ -67,10 +57,10 @@ The authoring suite provides hosts with an intuitive interface to build, edit, a
 
 *   **Quiz Metadata Management**: Hosts assign a required Quiz Title (1–120 characters), an optional Description (up to 500 characters), a primary Language selection, and an optional Cover Image URL.
 *   **Question Formats**: The MVP supports two core question formats:
-    *   *Multiple Choice*: 2 to 4 answer options with at least 1 designated correct option.
+    *   *Multiple Choice*: 2 to 4 answer options with exactly 1 designated correct option.
     *   *True / False*: Pre-populated binary options where exactly 1 option is marked correct.
 *   **Question Configuration Parameters**:
-    *   *Question Prompt*: Rich text or plain text prompt up to 250 characters.
+    *   *Question Prompt*: Plain text prompt up to 250 characters.
     *   *Time Limit*: Selectable countdown timer per question (options: 10s, 20s, 30s, 60s, 90s, 120s; default: 30s).
     *   *Point Allocation*: Selectable scoring weight per question (Standard: 1,000 pts max; Double Points: 2,000 pts max; No Points: 0 pts).
 *   **Reordering & Persistence**: Button-based reordering of questions within a quiz deck and auto-saving draft states to prevent content loss.
@@ -82,16 +72,16 @@ The table below outlines the core specifications governing session access and jo
 
 | Dimension | Specification Standard | Implementation Details |
 | :--- | :--- | :--- |
-| **Unique Quiz PIN** | 6-Digit Numeric Code | Random non-colliding numeric PIN (e.g., `839 201`); verified against Redis active session registry |
+| **Unique Quiz PIN** | 6-Digit Numeric Code | Random non-colliding numeric PIN (e.g., `839 201`); enforced by PostgreSQL for nonterminal sessions, with a Redis lookup cache |
 | **Dynamic QR Code** | Vector SVG / PNG Payload | High-contrast QR code generated on presenter screen; auto-navigates mobile camera to pre-filled join URL |
 | **Direct Share Link** | HTTPS URL Route | Structured route (`https://app.quiz.com/join?pin=839201`); copyable via one-click presenter button |
-| **Access Protocol** | WebSockets (WSS) | Persistent bi-directional socket connection with automatic fallback to HTTP long-polling |
+| **Access Protocol** | WebSockets (WSS) | Managed realtime delivery using provider-supported fallback; HTTP answers and snapshot polling provide recovery |
 | **Guest Registration** | Anonymous Nickname Entry | 1–25 character display name; sanitized via profanity filter; duplicate names assigned auto-suffix (e.g., `Alex_42`) |
 
 ### 3.3 FR-3: Live Hosting & Orchestration Dashboard
 The hosting dashboard serves as the presenter's command center, providing real-time room controls, participant tracking, and state orchestration.
 
-The live session moves deterministically through five room states managed by the WebSocket gateway:
+The live session moves deterministically through five visible room states managed by the authoritative API:
 
 1.  **Lobby State**: Displays room PIN, QR code, share link, real-time joined player counter, nickname grid, and a "Kick Participant" moderation control.
 2.  **Question Active State**: Broadcasts question prompt, answer options, and active countdown timer; displays live submission counter indicating how many participants have submitted responses.
@@ -103,12 +93,12 @@ The live session moves deterministically through five room states managed by the
 The participant client is an ultra-lightweight, mobile-responsive interface optimized for fast rendering and low latency on iOS and Android browsers.
 
 *   **Lobby Waiting State**: Displays connection confirmation, participant nickname, host branding, and a confirmation message.
-*   **Question Active State**: Renders color-coded and shape-coded answer selection buttons (Red Triangle, Blue Diamond, Yellow Circle, Green Square) matching the host display, alongside a server-synchronized countdown timer bar.
+*   **Question Active State**: Renders color-coded and shape-coded answer selection buttons (Tangerine Triangle, Cobalt Diamond, Sun Circle, Mint Square) matching the host display, alongside a server-synchronized countdown timer bar.
 *   **Answer Submission Mechanics**: Single-tap selection registers response instantly, displaying a locked "Response Submitted" screen to prevent duplicate submissions.
 *   **Result Reveal & Feedback State**: Screen updates instantly upon question closure:
-    *   *Correct*: Green visual flash, points earned for the question, speed bonus, and updated total score.
-    *   *Incorrect*: Red visual flash, correct answer indication, and current leaderboard rank.
-*   **Connection Resilience & Recovery**: Background heartbeat pings monitor connectivity every 3,000ms. If cellular or Wi-Fi connectivity drops, the client executes exponential backoff reconnection using a stored ephemeral token, preserving score and room state without kicking the player.
+    *   *Correct*: Mint feedback, points earned for the question, speed bonus, and updated total score.
+    *   *Incorrect*: Bubblegum feedback, correct answer indication, and current leaderboard rank.
+*   **Connection Resilience & Recovery**: Background heartbeat pings monitor connectivity every 3,000ms. If cellular or Wi-Fi connectivity drops, the client executes exponential backoff with jitter and snapshot reconnection using a stored ephemeral token, preserving score and room state without kicking the player.
 
 ### 3.5 FR-5: Scoring Engine & Real-Time Leaderboard
 The scoring engine computes participant scores dynamically based on accuracy and response velocity.
@@ -123,7 +113,7 @@ For example, on a 1,000 BasePoint question with a 30-second timer, a participant
 $$\text{Points} = 1000 \times \left( 0.5 + \left( 0.5 \times \frac{27}{30} \right) \right) = 1000 \times (0.5 + 0.45) = 950 \text{ points}$$
 
 #### Leaderboard Aggregation
-Redis sorted sets (`ZADD` and `ZREVRANGE`) aggregate participant scores in real time upon answer receipt. The presenter display renders animated rank changes and presents top score updates after each question, culminating in the 3-tier winner podium at session completion.
+PostgreSQL durably records accepted answers; Redis can cache score totals. Complete ranking uses the deterministic comparator in section 9, not Redis score ordering alone. The presenter display renders animated rank changes and presents top score updates after each question, culminating in the 3-tier winner podium at session completion.
 
 ### 3.6 FR-6: Post-Session Analytics & CSV Export
 At the conclusion of a session, hosts access structured summary metrics and downloadable reports:
@@ -133,193 +123,33 @@ At the conclusion of a session, hosts access structured summary metrics and down
 
 ---
 
-## 4. REST API & WebSocket Interface Specifications
+## 4. API and realtime contracts
 
-### 4.1 REST API Endpoint Contract
-The core API manages host authentication, quiz content management, live session initialization, and post-game data retrieval:
+[Technical contracts](docs/technical-contracts.md) specify the authoritative REST commands, realtime events, snapshot recovery, permission boundaries and error handling. Answers use authenticated HTTP submission, not client-published WebSocket commands. The original preliminary payloads are superseded.
 
-| Method | Endpoint Path | Primary Purpose | Authentication Required |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/register` | Register new host account | None |
-| `POST` | `/api/v1/auth/login` | Host login issuing JWT bearer token | None |
-| `GET` | `/api/v1/quizzes` | Fetch host's saved quiz library | Host JWT |
-| `POST` | `/api/v1/quizzes` | Create a new quiz deck | Host JWT |
-| `PUT` | `/api/v1/quizzes/:id` | Update existing quiz definition | Host JWT |
-| `POST` | `/api/v1/sessions` | Initialize live session & generate PIN | Host JWT |
-| `POST` | `/api/v1/sessions/join` | Validate PIN & register guest participant | None (Public) |
-| `GET` | `/api/v1/sessions/:id/export` | Download CSV report for completed session | Host JWT |
+## 5. Persistence model
 
-#### Sample API Payloads
-
-##### Join Session Endpoint (`POST /api/v1/sessions/join`)
-To join a session, the participant client submits the room PIN and display nickname to the public join endpoint:
-
-```json
-{
-  "pin": "839201",
-  "nickname": "Alex_Trainer"
-}
-```
-
-Upon validation, the server returns the session identifiers and an ephemeral token required for WebSocket connection:
-
-```json
-{
-  "success": true,
-  "data": {
-    "sessionId": "sess_99f82a1b-4c21",
-    "participantId": "part_33d8a1",
-    "nickname": "Alex_Trainer",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "wsEndpoint": "wss://app.quiz.com/ws/session/sess_99f82a1b-4c21"
-  }
-}
-```
-
-### 4.2 WebSocket Message Payload Protocol
-Real-time state communication between server and clients utilizes structured JSON frames containing an `event` identifier and a data `payload`.
-
-#### Server-to-Client: Question Active Event (`QUESTION_START`)
-When a question begins, the server broadcasts the question prompt, timer limit, and answer option metadata to all connected clients:
-
-```json
-{
-  "event": "QUESTION_START",
-  "sessionId": "sess_99f82a1b-4c21",
-  "payload": {
-    "questionIndex": 1,
-    "totalQuestions": 10,
-    "questionPrompt": "Which protocol is utilized for real-time bi-directional communication in this platform?",
-    "timeLimitSeconds": 30,
-    "options": [
-      { "id": "opt_a", "label": "HTTP/1.1", "color": "red", "shape": "triangle" },
-      { "id": "opt_b", "label": "WebSockets", "color": "blue", "shape": "diamond" },
-      { "id": "opt_c", "label": "FTP", "color": "yellow", "shape": "circle" },
-      { "id": "opt_d", "label": "SMTP", "color": "green", "shape": "square" }
-    ]
-  }
-}
-```
-
-#### Client-to-Server: Answer Submission Event (`SUBMIT_ANSWER`)
-When a participant taps an answer button, the client transmits the option ID and client timestamp:
-
-```json
-{
-  "event": "SUBMIT_ANSWER",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "payload": {
-    "questionIndex": 1,
-    "selectedOptionId": "opt_b",
-    "clientTimestampMs": 1727680025112
-  }
-}
-```
-
----
-
-## 5. Data Model & Database Schema
-
-The database architecture uses a PostgreSQL relational schema for persistent data storage paired with Redis key-value structures for real-time session state.
-
-The relational schema maps host accounts, quiz content, live session instances, participant rosters, and individual answer submissions:
-
-```sql
--- Users / Hosts Table
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Quizzes Table
-CREATE TABLE quizzes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    host_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(120) NOT NULL,
-    description TEXT,
-    cover_image_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Questions Table
-CREATE TABLE questions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
-    question_order INT NOT NULL,
-    prompt_text VARCHAR(250) NOT NULL,
-    time_limit_seconds INT NOT NULL DEFAULT 30,
-    point_multiplier DECIMAL(3,1) NOT NULL DEFAULT 1.0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Options Table
-CREATE TABLE options (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
-    option_text VARCHAR(150) NOT NULL,
-    is_correct BOOLEAN NOT NULL DEFAULT FALSE,
-    option_order INT NOT NULL
-);
-
--- Quiz Sessions Table
-CREATE TABLE quiz_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    quiz_id UUID NOT NULL REFERENCES quizzes(id),
-    host_id UUID NOT NULL REFERENCES users(id),
-    pin_code VARCHAR(6) UNIQUE NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'LOBBY',
-    started_at TIMESTAMP WITH TIME ZONE,
-    ended_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Participants Table
-CREATE TABLE session_participants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID NOT NULL REFERENCES quiz_sessions(id) ON DELETE CASCADE,
-    nickname VARCHAR(25) NOT NULL,
-    total_score INT NOT NULL DEFAULT 0,
-    final_rank INT,
-    joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Participant Responses Table
-CREATE TABLE participant_responses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID NOT NULL REFERENCES quiz_sessions(id) ON DELETE CASCADE,
-    participant_id UUID NOT NULL REFERENCES session_participants(id) ON DELETE CASCADE,
-    question_id UUID NOT NULL REFERENCES questions(id),
-    selected_option_id UUID REFERENCES options(id),
-    is_correct BOOLEAN NOT NULL,
-    response_time_ms INT NOT NULL,
-    points_awarded INT NOT NULL DEFAULT 0,
-    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
+[Technical contracts](docs/technical-contracts.md#persistence) define the relational entities and invariants to implement as Stage 2 migrations. Session questions/options are immutable snapshots, responses are durable, and retries cannot award points twice. Redis is recoverable cache, not the sole score store. No schema has been applied yet.
 
 ---
 
 ## 6. Non-Functional Requirements (NFRs)
 
 ### 6.1 Performance & Concurrency
-*   **Capacity Boundary**: A single live room supports up to 200 concurrent connected participants without degradation in state broadcast latency.
+*   **Capacity Boundary**: A single live room supports up to 500 concurrent connected participants without degradation in state broadcast latency.
 *   **State Latency**: Host state transitions (question start, answer lock) broadcast and render on participant screens within <200ms under standard 4G/Wi-Fi conditions.
 *   **Database Query Bounds**: API endpoint responses (quiz fetch, room creation) return within <150ms at the 95th percentile.
 
 ### 6.2 Network Resilience & Offline Sync
-*   **Heartbeat Monitoring**: WebSocket connection ping/pong executed every 3,000ms.
-*   **Disconnection Grace Period**: If a participant experiences network loss, the system retains their session state and score in Redis for 120 seconds.
+*   **Heartbeat Monitoring**: Use realtime SDK connection monitoring; do not write participant heartbeats to Redis every three seconds.
+*   **Disconnection Grace Period**: If a participant experiences network loss, identity, accepted answers, and scores persist throughout the session in PostgreSQL; cache expiry does not remove them.
 *   **Reconnection Handling**: Upon network restoration, the client transmits the stored ephemeral token to re-sync state automatically without re-entering nickname or PIN.
 
 ### 6.3 Security & Data Privacy
 *   **Authentication**: Host actions protected via JWT bearer tokens over HTTPS/TLS 1.3.
 *   **Participant Input Sanitization**: Nicknames and textual inputs sanitized against HTML/Script injection attacks.
-*   **Ephemeral Data Handling**: Guest participant tokens expire 6 hours post-session; no Personally Identifiable Information (PII) is requested or stored for participants.
-*   **Rate Limiting**: Joining endpoints restricted to 10 requests per IP per minute to prevent automated bot joining.
+*   **Ephemeral Data Handling**: Guest participant tokens expire 6 hours post-session; no participant email or account is required; nicknames may contain personal information.
+*   **Rate Limiting**: Configurable joining limits support shared Wi-Fi; see section 9 for defaults.
 
 ### 6.4 Usability & Accessibility
 *   **Device Compatibility**: Responsive UI renders across mobile viewports (minimum 320px width), tablet, and desktop displays (Chrome, Safari, Firefox, Edge).
@@ -356,6 +186,54 @@ The success of the MVP build will be evaluated against four core operational met
 Prior to public deployment, the build must pass the following validation gates:
 
 *   [ ] **Cross-Device QA**: Verified seamless rendering on iOS Safari, Android Chrome, and Desktop Chrome.
-*   [ ] **Load & Concurrency Testing**: Simulated 200 concurrent WebSocket participants submitting answers within a 2-second window with zero dropped frames.
+*   [ ] **Load & Concurrency Testing**: Simulated 500 concurrent WebSocket participants submitting answers within a 2-second window with zero lost acknowledged answers and zero duplicate points.
 *   [ ] **Multi-Channel Verification**: Confirmed join flows via Direct Link click, QR Code mobile scan, and manual 6-digit PIN entry.
 *   [ ] **Resilience Testing**: Simulated abrupt Wi-Fi disconnection mid-session and verified successful reconnection and score preservation.
+
+## 9. Reconciled MVP rules
+
+### Scope and authoring
+
+Both authoring and hosting support desktop/tablet/mobile down to 320px. Blob customization (six bodies, three moods), five uniform-random leaderboard themes with no immediate repeat/no host picker, cosmetic streaks, awards, personal final cards and ease ratings are in scope. True uses cobalt/diamond and false tangerine/triangle. UI is initially English; quiz language is metadata. Sound/haptics, dark mode, UI translations, rich text, public draft sharing and native apps are deferred alongside section 7 exclusions.
+
+Title 1–120, description up to 500, prompt 1–250, nonempty option 1–150 characters; optional HTTPS cover URL. Exactly one correct answer for both formats. Default timer is 30s for both. Incomplete drafts may save; launch requires at least one fully valid question. Hosts add/delete/reorder questions. Revision-checked debounced autosave shows saving/saved/failed and cannot overwrite a newer draft silently. Each launch freezes quiz content. Archive rather than deleting quizzes with history. Login, logout, library and password recovery are required; reset email integration is configured during account implementation.
+
+### Joining and limits
+
+Default configurable room capacity: 500. Canonical link `/join?pin=839201`; path form redirects. Generate a real QR from configured HTTPS origin. PINs are six-character strings including leading zeros and unique while a session is nonterminal. New joining and moderation are lobby-only; existing players reconnect during play. Capacity counts roster members, not sockets. Joining/start must serialize. Kicking revokes access and releases a lobby place. Nicknames normalize and fit 25 characters including server-assigned duplicate suffix; prohibited names are rejected with a clear error.
+
+Operator defaults, adjustable after shared-Wi-Fi tests: 1200 join attempts/IP/minute, burst 600; 20/browser/minute; 30 invalid PIN attempts/IP/minute. Return 429 plus Retry-After. Reconnect has its own abuse budget and does not consume a place. Browser identifiers are supplemental, not trusted security boundaries.
+
+### States and control
+
+LOBBY → QUESTION_ACTIVE → RESULT_REVEAL → LEADERBOARD → next QUESTION_ACTIVE or COMPLETED. COMPLETED renders final podium. CANCELLED/INTERRUPTED are terminal. Recovery status is an overlay, not a separate question state. Start requires at least one player. No early reveal/skip: question closes on its deadline even if everyone answered. Host reveals leaderboard and advances, or finishes after last leaderboard. Show fewer winners if fewer than three players. Play again creates a fresh lobby with a new join flow.
+
+One renewable host-control lease (30s, renewed every 10s foregrounded) fences commands with a generation. Another authenticated device explicitly takes over; old commands are rejected. Host loss/backgrounding lets active question finish then holds progression. Fifteen minutes without host heartbeat closes as INTERRUPTED; preserve partial results without champion celebration. Lobby cancel is CANCELLED; early ending after start is INTERRUPTED.
+
+### Timing, submissions and recovery
+
+Use server startsAt/endsAt; client animates countdown without per-second server broadcasts. API accepts only an active question, correct option membership and one response per player/question, received before endsAt. At the exact deadline reject. Never trust client timestamps. Concurrent closure/acceptance serialize; a received but not yet committed answer is not acknowledged and can still be rejected if closure wins. Do not promise to accept an uncommitted response.
+
+Tap displays Submitting and locally locks; only durable acknowledgement says Locked in. Lost acknowledgement retries the same submission ID and recovers its original outcome. Definitive rejection allows a new selection only if none accepted and question is active. Unknown transport outcome keeps Checking your answer. No offline queue submits into another question. Backoff with jitter: 1s initial, capped 30s; reconnect reads role-filtered snapshot and own accepted response. Tokens remain renewable for active session and expire six hours after termination; Redis loss does not erase participants.
+
+Deadline/inactivity jobs are durable and retry-safe. APIs enforce expiry independently and can reconcile overdue state. If realtime delivery fails, persistent outbox and snapshot recovery restore truth. Service outage shows Reconnecting; never silently accept/score offline answers.
+
+### Scoring, distinct ranks, statistics
+
+`elapsedMs = clamp(serverReceivedAt - startsAt, 0, durationMs)`; `multiplier = 0.5 + 0.5 * (durationMs - elapsedMs) / durationMs`; `points = floor(basePoints * multiplier + 0.5)`. Correct accepted answers use 0/1000/2000 base points. Incorrect/unanswered = 0. Examples: 1000/30s/3s → 950; 2000/10s/1.8s → 1820; 2000/30s/1.8s → 1940. Replays return original time/score.
+
+Rank comparator: total points descending; scored-question correct count descending; cumulative response time for those correct answers ascending; last correct accepted timestamp ascending (missing last); UUID lexical ascending. Distinct ranks for everyone, including all-zero-score games. No-point questions affect accuracy/streak, not tie-breaks. Rank delta is previous minus current, null on first question. Gap may be zero for equal points separated by response time. Finalize all results at closure before reveal.
+
+Correct increments cosmetic streak (including no-point); incorrect/unanswered resets. Speed Demon: lowest average correct-response time, at least one correct required. Hot Streak: highest positive best streak. Comeback Kid: largest positive improvement from first-question to final rank, at least one correct required. Resolve award ties by final rank; omit award with no eligible winner. One player may earn multiple awards, stored as array. Interrupted games have no awards.
+
+### Basic reporting and local card
+
+Freeze roster at start, exclude lobby kicks, include disconnected players. Completed participant accuracy = correct/all questions; overall accuracy = correct/(roster × questions); unanswered counts incorrect. Completion = players answering every question/roster. Average time uses all accepted responses, null if none; award average uses correct responses only. Toughest = lowest correct/roster, tie by question order. Partial reports use closed questions only; label provisional/partial and use null metrics if none closed. Cancelled lobbies have no game analytics.
+
+CSV includes score/rank and per-question option/status/correctness/time/points; unanswered nullable fields are blank. Escape spreadsheet formula prefixes in user text. Ease rating: optional one value 1–5/player/completed session, idempotent. Final card percentile = ceil(rank/playerCount × 100), e.g. 2/24 → top 9%. Save my card generates a local PNG with download and mobile save/share fallback; no public card hosting. Top-three confetti only.
+
+### Validation and security
+
+Measure state commit-to-render p95 <200ms in defined APJ Wi-Fi/4G profile; record command/API latency separately. Warm API p95 <150ms target, report cold starts separately. Validate 500 players joining from shared IP, 500 answers in two seconds, duplicate retries, deadline races, host takeover/backgrounding, reconnection, process/deployment changes and provider outages. Test two simultaneous 500-player rooms separately from per-room capacity. Verify exact scores/ranks agree across snapshots, displays and CSV.
+
+Host cookies must be secure/HttpOnly with CSRF checks for writes; ownership and guest/realtime scopes enforced server-side. Cache TTL never deletes reports. Secret/token logging prohibited. Transactional event delivery uses durable outbox and deduplication. Provider plans/throughput/connection quotas and APJ availability must pass integration checks. Data retention/deletion policy remains a public-release decision; use synthetic data before then.
