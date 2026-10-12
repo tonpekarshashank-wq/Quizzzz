@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ClientError } from "@/lib/client";
 import {
+  MAX_QUESTIONS,
   launchErrors,
   newQuestion,
   points,
@@ -15,6 +16,8 @@ import {
 } from "@/lib/model";
 import { Dialog } from "./dialog";
 import { AnswerKey, Blob, Chip, Segments } from "./ui";
+import { QuestionIdeas } from "./question-ideas";
+import { questionFromIdea, type QuestionIdea } from "@/lib/question-ideas";
 type Status = "saved" | "waiting" | "saving" | "failed" | "conflict";
 export function Editor({ initial }: { initial: Quiz }) {
   const router = useRouter();
@@ -26,9 +29,10 @@ export function Editor({ initial }: { initial: Quiz }) {
   );
   const [status, setStatus] = useState<Status>("saved");
   const [error, setError] = useState("");
-  const [preview, setPreview] = useState(false);
+  const [ideasVisible, setIdeasVisible] = useState(false);
   const [checks, setChecks] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const pendingFocus = useRef<string | null>(null);
   const current = useRef(initial.draft);
   const revision = useRef(initial.revision);
   const version = useRef(0);
@@ -117,14 +121,33 @@ export function Editor({ initial }: { initial: Quiz }) {
       ),
     });
   }
-  function add(type: "mc" | "tf") {
-    const q = newQuestion(type);
+  function append(q: Question) {
+    if (current.current.questions.length >= MAX_QUESTIONS) return;
+    pendingFocus.current = q.id;
     change({
       ...current.current,
       questions: [...current.current.questions, q],
     });
     setSelected(q.id);
   }
+  function add(type: "mc" | "tf") {
+    append(newQuestion(type));
+  }
+  function addIdea(idea: QuestionIdea) {
+    if (current.current.questions.some((q) => q.sourceIdeaId === idea.id))
+      return;
+    append(questionFromIdea(idea));
+  }
+  useEffect(() => {
+    const id = pendingFocus.current;
+    if (!id) return;
+    const field = document.getElementById(`prompt-${id}`);
+    if (field) {
+      pendingFocus.current = null;
+      field.scrollIntoView({ block: "center" });
+      field.focus({ preventScroll: true });
+    }
+  }, [draft.questions, selected]);
   function move(id: string, dir: number) {
     const qs = [...current.current.questions];
     const i = qs.findIndex((q) => q.id === id),
@@ -145,7 +168,6 @@ export function Editor({ initial }: { initial: Quiz }) {
     a.click();
     URL.revokeObjectURL(url);
   }
-  const active = draft.questions.find((q) => q.id === selected);
   const errors = checks ? launchErrors(draft) : [];
   return (
     <>
@@ -164,15 +186,7 @@ export function Editor({ initial }: { initial: Quiz }) {
           quizzzz<span>✳</span>
         </Link>
         <div className="editor-title">
-          <label className="sr-only" htmlFor="quiz-title">
-            Quiz title
-          </label>
-          <input
-            id="quiz-title"
-            value={draft.title}
-            maxLength={120}
-            onChange={(e) => change({ ...draft, title: e.target.value })}
-          />
+          <strong>{draft.title || "Untitled quiz"}</strong>
         </div>
         <div className="editor-nav-actions">
           <span className={`save-status ${status}`} role="status">
@@ -262,11 +276,12 @@ export function Editor({ initial }: { initial: Quiz }) {
               </p>
             </div>
             <button
-              className="button secondary small preview-toggle"
-              aria-pressed={preview}
-              onClick={() => setPreview(!preview)}
+              className="button secondary small ideas-toggle"
+              aria-expanded={ideasVisible}
+              aria-controls="question-ideas"
+              onClick={() => setIdeasVisible(!ideasVisible)}
             >
-              Phone preview
+              Question ideas
             </button>
           </div>
           {error && (
@@ -329,54 +344,17 @@ export function Editor({ initial }: { initial: Quiz }) {
               </ul>
             </div>
           )}
-          <details className="metadata card">
-            <summary>
-              Quiz details{" "}
-              <span className="hint">Description, language & cover</span>
-            </summary>
+          <details className="metadata card" open>
+            <summary>Quiz details</summary>
             <div className="metadata-fields">
               <label>
-                Description
-                <textarea
-                  value={draft.description}
-                  maxLength={500}
-                  onChange={(e) =>
-                    change({ ...draft, description: e.target.value })
-                  }
-                />
-                <span className="hint">{draft.description.length}/500</span>
-              </label>
-              <label>
-                Quiz language
-                <select
-                  value={draft.language}
-                  onChange={(e) =>
-                    change({ ...draft, language: e.target.value })
-                  }
-                >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi</option>
-                  <option value="ja">Japanese</option>
-                  <option value="zh">Chinese</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                  {!["en", "hi", "ja", "zh", "es", "fr", "de"].includes(
-                    draft.language,
-                  ) && <option value={draft.language}>{draft.language}</option>}
-                </select>
-              </label>
-              <label>
-                Cover image URL (optional)
+                Quiz name
                 <input
-                  type="url"
-                  placeholder="https://…"
-                  value={draft.coverImageUrl}
-                  onChange={(e) =>
-                    change({ ...draft, coverImageUrl: e.target.value })
-                  }
+                  value={draft.title}
+                  maxLength={120}
+                  onChange={(e) => change({ ...draft, title: e.target.value })}
                 />
-                <span className="hint">Use an HTTPS URL.</span>
+                <span className="hint">{draft.title.length}/120</span>
               </label>
             </div>
           </details>
@@ -435,6 +413,7 @@ export function Editor({ initial }: { initial: Quiz }) {
                         Question{" "}
                         <span className="hint">{q.prompt.length}/250</span>
                         <textarea
+                          id={`prompt-${q.id}`}
                           aria-label={`Question ${i + 1} prompt`}
                           placeholder="What will you ask?"
                           value={q.prompt}
@@ -564,57 +543,25 @@ export function Editor({ initial }: { initial: Quiz }) {
           <div className="add-questions">
             <button
               className="button dashed"
-              disabled={draft.questions.length >= 100}
+              disabled={draft.questions.length >= MAX_QUESTIONS}
               onClick={() => add("mc")}
             >
               + Multiple choice
             </button>
             <button
               className="button dashed"
-              disabled={draft.questions.length >= 100}
+              disabled={draft.questions.length >= MAX_QUESTIONS}
               onClick={() => add("tf")}
             >
               + True / False
             </button>
           </div>
         </section>
-        <aside className={`preview-panel ${preview ? "visible" : ""}`}>
-          <div className="eyebrow">THE PLAYER'S VIEW</div>
-          <h2>Looks good on you.</h2>
-          <div className="phone-frame">
-            <div className="phone-notch" />
-            <div className="phone-meta">
-              <span>
-                Q {active ? draft.questions.indexOf(active) + 1 : 0} /{" "}
-                {draft.questions.length}
-              </span>
-              <span>{active?.basePoints ?? 0} PTS</span>
-            </div>
-            <div className="fuse">
-              <span />
-            </div>
-            <h3>{active?.prompt || "Your question goes here."}</h3>
-            <div className="phone-options">
-              {active?.options.map((o, i) => (
-                <div className="phone-answer" key={o.id}>
-                  <AnswerKey
-                    index={active.type === "tf" ? (i === 0 ? 1 : 0) : i}
-                  />
-                  <span>{o.label || `Answer ${i + 1}`}</span>
-                </div>
-              ))}
-            </div>
-            {!active && (
-              <div className="preview-blob">
-                <Blob body={4} size={80} />
-              </div>
-            )}
-            <p className="phone-footnote">A preview of your question.</p>
-          </div>
-          <p className="preview-caption">
-            One question. A room full of possibilities.
-          </p>
-        </aside>
+        <QuestionIdeas
+          questions={draft.questions}
+          onAdd={addIdea}
+          visible={ideasVisible}
+        />
       </main>
       {deleting && (
         <Dialog label="delete-title" onClose={() => setDeleting(null)}>

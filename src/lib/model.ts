@@ -1,10 +1,12 @@
 import { z } from "zod";
 export const times = [10, 20, 30, 60, 90, 120] as const;
 export const points = [0, 1000, 2000] as const;
+export const MAX_QUESTIONS = 100;
 const optionSchema = z.object({ id: z.uuid(), label: z.string().max(150) });
 export const questionSchema = z
   .object({
     id: z.uuid(),
+    sourceIdeaId: z.string().max(80).optional(),
     type: z.enum(["mc", "tf"]),
     prompt: z.string().max(250),
     timeLimit: z.union(times.map((t) => z.literal(t))),
@@ -44,7 +46,7 @@ export const draftSchema = z
       z.literal(""),
       z.url().refine((v) => v.startsWith("https://"), "Use an HTTPS image URL"),
     ]),
-    questions: z.array(questionSchema).max(100),
+    questions: z.array(questionSchema).max(MAX_QUESTIONS),
   })
   .superRefine((d, ctx) => {
     if (new Set(d.questions.map((q) => q.id)).size !== d.questions.length)
@@ -68,7 +70,7 @@ export const emptyDraft: Draft = {
 };
 export function launchErrors(d: Draft): string[] {
   const errors: string[] = [];
-  if (!d.title.trim()) errors.push("Add a quiz title.");
+  if (!d.title.trim()) errors.push("Add a quiz name.");
   if (!d.questions.length) errors.push("Add at least one question.");
   d.questions.forEach((q, i) => {
     if (!q.prompt.trim()) errors.push(`Question ${i + 1}: add a prompt.`);

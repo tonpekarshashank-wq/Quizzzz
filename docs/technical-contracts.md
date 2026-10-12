@@ -119,3 +119,7 @@ Join transaction locks session, rechecks lobby/capacity, assigns nickname, creat
 Redis keys are namespaced by environment and session: PIN cache, snapshot revision, abuse counters, ephemeral aggregates. Cache values include revision; older writes cannot overwrite newer state. Expire session cache six hours after termination, remove PIN promptly, and use PostgreSQL lookup on cache miss. Redis failure must not bypass abuse controls: return retriable service error for new joins if safe limits cannot be enforced; existing identity/results remain recoverable from PostgreSQL.
 
 Retention of durable reports is a public-release decision. Guest-token expiry and cache TTL do not authorize deleting reports. Cross-service delivery has explicit retry/reconciliation, not a distributed transaction assumption.
+
+## Question ideas provenance
+
+Editable draft questions may include optional `sourceIdeaId` (up to 80 characters), persisted within existing draft JSONB. The builder uses it to prevent adding the same library idea while its copied question remains in the draft, even after edits or reload. Deleting the copy restores eligibility. Library templates are local static data; copying generates independent question and option UUIDs and follows ordinary revision-safe autosave. No new database migration or runtime canvas scripts are required. Maximum question count remains 100.

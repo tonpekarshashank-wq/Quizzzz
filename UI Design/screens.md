@@ -22,7 +22,7 @@ Room states from the PRD map to screens like this:
 
 **Purpose:** create and edit a quiz quickly.
 
-**Layout:** top bar; center column of question cards; right-hand cobalt panel with a live phone preview.
+**Layout:** top bar; center column of question cards; right-hand cobalt Question ideas panel.
 
 - **Top bar:** logo, quiz name input (1–120 chars), "Autosaved" indicator, primary **Go live**.
 - **Header row:** "N questions", plus an estimate ("about 3 min · up to 6,000 pts each player").
@@ -33,7 +33,17 @@ Room states from the PRD map to screens like this:
 - **Time options:** 10, 20, 30, 60, 90, 120 seconds (default 30).
 - **Points options:** Standard (1,000), Double (2,000), None (0).
 - **Add buttons:** "+ Multiple choice" (4 answers) and "+ True / False" (2 answers). A new card opens immediately.
-- **Live preview:** a phone frame showing the player's view of the open question (question number, points sticker, fuse bar, prompt, answer rows). Updates as the host types.
+#### Question ideas panel
+
+Replaces the phone preview. Desktop uses the right-hand cobalt column; at mobile widths a **Question ideas** toggle reveals it below the question list (supports 320px).
+
+- Header, filtered count badge and help: "Tap Add to drop one into your quiz. Edit it after."
+- Category toggle chips: All (default), Science, Tech, Geography, Work safety, General; instant filtering with `aria-pressed`.
+- Vertically scrolling sticker cards show category/type, allowed time/points, prompt and a 2-column answer grid using existing shape/color keys. Correct answer has a check and mint tint.
+- **Add** appends an independent editable copy, opens it, scrolls it into view and focuses its prompt. Uses normal revision-safe autosave.
+- A non-interactive mint **✓ Added** state prevents duplicates while that question exists, including after editing/reload. Deleting the copied question restores Add.
+- At 100 questions, remaining Add buttons are disabled with an explanatory message. Ideas obey the application's question schema.
+
 
 **States to build:** empty quiz, a card with validation errors (prompt empty, fewer than 2 answers, no correct answer), saving, save failed, 100% of fields at their max length.
 

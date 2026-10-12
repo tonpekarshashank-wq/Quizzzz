@@ -25,7 +25,7 @@ test("mobile authoring persists, true/false, reorder, delete and archive", async
   await page.setViewportSize({ width: 320, height: 844 });
   await register(page);
   await makeQuiz(page);
-  await page.getByLabel("Quiz title").fill("Friday science");
+  await page.getByLabel("Quiz name").fill("Friday science");
   await page
     .getByRole("button", { name: "+ Multiple choice", exact: true })
     .click();
@@ -54,13 +54,13 @@ test("mobile authoring persists, true/false, reorder, delete and archive", async
   );
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
   await page.reload();
-  await expect(page.getByLabel("Quiz title")).toHaveValue("Friday science");
+  await expect(page.getByLabel("Quiz name")).toHaveValue("Friday science");
   await accessible(page);
   await page
     .getByRole("button", { name: "Edit question", exact: false })
     .count();
   await page
-    .getByRole("button", { name: "Phone preview", exact: true })
+    .getByRole("button", { name: "Question ideas", exact: true })
     .click();
   expect(
     await page.evaluate(
@@ -110,11 +110,11 @@ test("two tabs detect revision conflict and preserve edits", async ({
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
   const second = await context.newPage();
   await second.goto(page.url());
-  await page.getByLabel("Quiz title").fill("First tab saved");
+  await page.getByLabel("Quiz name").fill("First tab saved");
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
-  await second.getByLabel("Quiz title").fill("Second tab kept locally");
+  await second.getByLabel("Quiz name").fill("Second tab kept locally");
   await expect(second.getByRole("status")).toHaveText("Save conflict");
-  await expect(second.getByLabel("Quiz title")).toHaveValue(
+  await expect(second.getByLabel("Quiz name")).toHaveValue(
     "Second tab kept locally",
   );
   await expect(
@@ -224,9 +224,9 @@ test("failed saves keep edits and edits during an in-flight save are queued", as
       await page.unroute(`**/api/v1/quizzes/${id}`);
     } else await route.continue();
   });
-  await page.getByLabel("Quiz title").fill("Kept through failure");
+  await page.getByLabel("Quiz name").fill("Kept through failure");
   await expect(page.getByRole("status")).toHaveText("Save failed");
-  await expect(page.getByLabel("Quiz title")).toHaveValue(
+  await expect(page.getByLabel("Quiz name")).toHaveValue(
     "Kept through failure",
   );
   await page.getByRole("button", { name: "Retry save" }).click();
@@ -248,11 +248,113 @@ test("failed saves keep edits and edits during an in-flight save are queued", as
     }
     await route.continue();
   });
-  await page.getByLabel("Quiz title").fill("First queued save");
+  await page.getByLabel("Quiz name").fill("First queued save");
   await arrival;
-  await page.getByLabel("Quiz title").fill("Latest queued save");
+  await page.getByLabel("Quiz name").fill("Latest queued save");
   release();
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
   await page.reload();
-  await expect(page.getByLabel("Quiz title")).toHaveValue("Latest queued save");
+  await expect(page.getByLabel("Quiz name")).toHaveValue("Latest queued save");
+});
+
+test("question ideas filter, copy independently, persist provenance and enforce capacity", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await register(page);
+  const id = await makeQuiz(page);
+  await page
+    .getByRole("button", { name: "Question ideas", exact: true })
+    .click();
+  const panel = page.getByRole("complementary", { name: "Question ideas" });
+  await expect(panel.getByRole("article")).toHaveCount(9);
+  await panel.getByRole("button", { name: "Science", exact: true }).click();
+  await expect(
+    panel.getByRole("button", { name: "Science", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(panel.getByRole("article")).toHaveCount(3);
+  const mercury = panel.getByRole("article", {
+    name: "Which planet is closest to the Sun?",
+    exact: true,
+  });
+  await mercury.getByRole("button", { name: /^Add:/ }).click();
+  await expect(page.getByLabel("Question 1 prompt")).toBeFocused();
+  await expect(page.getByLabel("Question 1 prompt")).toHaveValue(
+    "Which planet is closest to the Sun?",
+  );
+  await expect(mercury.getByText("✓ Added", { exact: true })).toBeVisible();
+  await page.getByLabel("Question 1 prompt").fill("My edited question");
+  await expect(page.getByRole("status")).toHaveText("✓ Saved");
+  await page.reload();
+  await expect(page.getByLabel("Question 1 prompt")).toHaveValue(
+    "My edited question",
+  );
+  await page
+    .getByRole("button", { name: "Question ideas", exact: true })
+    .click();
+  await expect(mercury.getByText("✓ Added", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Delete question", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Delete", exact: true })
+    .click();
+  await mercury.getByRole("button", { name: /^Add:/ }).click();
+  await expect(page.getByLabel("Question 1 prompt")).toHaveValue(
+    "Which planet is closest to the Sun?",
+  );
+  await panel
+    .getByRole("article", { name: "The Sun is a star.", exact: true })
+    .getByRole("button", { name: /^Add:/ })
+    .click();
+  await expect(page.getByLabel("Question 2 prompt")).toBeFocused();
+  await expect(
+    page.getByLabel("Question 2 answer 1", { exact: true }),
+  ).toHaveValue("True");
+  await expect(page.getByRole("status")).toHaveText("✓ Saved");
+  await accessible(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/ideas-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await expect(panel).toBeVisible();
+  await page.screenshot({
+    path: "test-results/ideas-desktop.png",
+    fullPage: true,
+  });
+  const quiz = (await (await page.request.get(`/api/v1/quizzes/${id}`)).json())
+    .data;
+  expect(quiz.draft.questions[0].sourceIdeaId).toBe("science-mercury");
+  expect(quiz.draft.questions[1].sourceIdeaId).toBe("science-star");
+  const template = quiz.draft.questions[0];
+  quiz.draft.questions = Array.from({ length: 100 }, () => {
+    const options = template.options.map((o: { label: string }) => ({
+      id: crypto.randomUUID(),
+      label: o.label,
+    }));
+    return {
+      ...template,
+      id: crypto.randomUUID(),
+      sourceIdeaId: undefined,
+      options,
+      correctOptionId: options[0].id,
+    };
+  });
+  const response = await page.request.put(`/api/v1/quizzes/${id}`, {
+    headers: { Origin: "http://127.0.0.1:3217" },
+    data: { draft: quiz.draft, expectedRevision: quiz.revision },
+  });
+  expect(response.ok()).toBe(true);
+  await page.reload();
+  await expect(panel.getByRole("status")).toContainText("100 questions");
+  const buttons = panel.getByRole("button", { name: /^Add:/ });
+  await expect(buttons).toHaveCount(9);
+  for (const button of await buttons.all()) await expect(button).toBeDisabled();
 });
