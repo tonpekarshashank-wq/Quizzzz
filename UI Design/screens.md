@@ -37,7 +37,7 @@ Room states from the PRD map to screens like this:
 
 Replaces the phone preview. Desktop uses the right-hand cobalt column; at mobile widths a **Question ideas** toggle reveals it below the question list (supports 320px).
 
-- Database-backed curated library (30 initial ideas, six per content category), loaded through the host-authenticated API; skeleton, empty category, inline Retry and pagination states.
+- Database-backed curated library, not AI generation (PRD §7). Prototype samples are placeholders; the implementation seeds 30 ideas, six per content category, loaded through the host-authenticated API; skeleton, empty category, inline Retry and pagination states.
 - Header, filtered count badge and help: "Tap Add to drop one into your quiz. Edit it after."
 - Category toggle chips: All (default), Science, Tech, Geography, Work safety, General; instant filtering with `aria-pressed`.
 - Vertically scrolling sticker cards show category/type, allowed time/points, prompt and a 2-column answer grid using existing shape/color keys. Correct answer has a check and mint tint.
@@ -48,7 +48,7 @@ Replaces the phone preview. Desktop uses the right-hand cobalt column; at mobile
 
 **States to build:** empty quiz, a card with validation errors (prompt empty, fewer than 2 answers, no correct answer), saving, save failed, 100% of fields at their max length.
 
-**Interactions in the prototype:** open a card, mark correct, change time and points, edit prompt and answers, reorder, add questions.
+**Interactions in the prototype:** open a card, mark correct, change time and points, edit prompt and answers, reorder, add blank questions, filter ideas by category, and add an idea to the quiz.
 
 ### 2. Lobby (`Lobby.dc.html`) [FR-2, FR-3 Lobby state]
 

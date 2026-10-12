@@ -21,6 +21,7 @@ All of these are **in MVP scope** (confirmed).
 | **Themed leaderboard** | Host leaderboard | **Random theme per question**, chosen by the server, never the same theme twice in a row. Include a `theme` id in each leaderboard event (`summit`, `gp`, `tour`, `moon`, `map`). No host control. |
 | **Score breakdown** | Phone correct | Base points, speed multiplier, points earned, total |
 | **Gap to next place** | Phone result | Points to the next higher rank |
+| **Question ideas library** | Quiz builder, right panel | A curated question library: `GET /api/v1/question-ideas?category=&limit=&cursor=` returning `{id, category, kind, prompt, timeSeconds, points, options[], correctIndex}`. Adding one copies it into the quiz through the normal `PUT /quizzes/:id`; no special endpoint is needed. Content must be written and reviewed by the team (this is not AI generation, which is out of scope in PRD §7). |
 | **Player final rank card** | Phone, end of game | Per participant at `GAME_END`: final rank, player count, percentile, score, accuracy, avg ms, best streak, optional award |
 | **Ease rating** | Phone, final card | One 1 to 5 rating per participant per session (PRD KPI: "How easy was it to join and play?") |
 
@@ -51,3 +52,5 @@ Use `/api/v1` endpoints in the technical contracts. Builder reads/writes owner q
 ## Resolved behavior and remaining validation
 
 Stage 1 UX defines login/library/reports, mobile hosting, builder validation, moderation, join errors, timeout, interruption and reconnect layouts. Pixel implementation and rendered browser checks remain for later stages. Uniform themes/no repeats, distinct points-first response-time ranks, generated local PNG, and all confirmed avatar/streak/card additions are settled. Sound/haptics, dark mode and UI translations are deferred. Verify 320px, large text and reduced motion during build.
+
+Open for product: who writes and maintains the Question ideas library, how many ideas ship at launch, whether categories are fixed, and whether ideas become searchable or include a host's own past questions later.

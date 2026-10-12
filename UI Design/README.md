@@ -12,7 +12,7 @@ A light, tactile **"stickers, tickets and blobs"** look: chalk ground, 3px ink o
 
 Goals the design serves:
 
-- **Easy quiz creation:** one stack of cards, edited in place, with a live phone preview.
+- **Easy quiz creation:** one stack of cards, edited in place, with a column of ready-made question ideas to add in one tap.
 - **Zero-friction joining:** a 6-digit code (or QR) and a nickname. No account.
 - **Excitement:** big-screen moments (ticket lobby, fuse timer, animated reveal, themed leaderboard, winner cards) and phone feedback (score receipt, streaks, rank arrows).
 
