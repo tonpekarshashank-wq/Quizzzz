@@ -261,18 +261,33 @@ test("question ideas filter, copy independently, persist provenance and enforce 
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 844 });
+  expect((await page.request.get("/api/v1/question-ideas")).status()).toBe(401);
   await register(page);
+  const firstPage = (
+    await (
+      await page.request.get("/api/v1/question-ideas?category=Science&limit=2")
+    ).json()
+  ).data;
+  expect(firstPage.items).toHaveLength(2);
+  const nextPage = (
+    await (
+      await page.request.get(
+        `/api/v1/question-ideas?category=Science&limit=2&cursor=${firstPage.nextCursor}`,
+      )
+    ).json()
+  ).data;
+  expect(nextPage.items[0].id).not.toBe(firstPage.items[0].id);
   const id = await makeQuiz(page);
   await page
     .getByRole("button", { name: "Question ideas", exact: true })
     .click();
   const panel = page.getByRole("complementary", { name: "Question ideas" });
-  await expect(panel.getByRole("article")).toHaveCount(9);
+  await expect(panel.getByRole("article")).toHaveCount(30);
   await panel.getByRole("button", { name: "Science", exact: true }).click();
   await expect(
     panel.getByRole("button", { name: "Science", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect(panel.getByRole("article")).toHaveCount(3);
+  await expect(panel.getByRole("article")).toHaveCount(6);
   const mercury = panel.getByRole("article", {
     name: "Which planet is closest to the Sun?",
     exact: true,
@@ -323,7 +338,18 @@ test("question ideas filter, copy independently, persist provenance and enforce 
     path: "test-results/ideas-mobile.png",
     fullPage: true,
   });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   await page.setViewportSize({ width: 1360, height: 900 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   await expect(panel).toBeVisible();
   await page.screenshot({
     path: "test-results/ideas-desktop.png",
@@ -355,6 +381,67 @@ test("question ideas filter, copy independently, persist provenance and enforce 
   await page.reload();
   await expect(panel.getByRole("status")).toContainText("100 questions");
   const buttons = panel.getByRole("button", { name: /^Add:/ });
-  await expect(buttons).toHaveCount(9);
+  await expect(buttons).toHaveCount(30);
   for (const button of await buttons.all()) await expect(button).toBeDisabled();
+});
+
+test("question ideas skeleton, retry, empty category and stale responses", async ({
+  page,
+}) => {
+  await register(page);
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route("**/api/v1/question-ideas?**", async (route) => {
+    if (fail) {
+      await gate;
+      await route.fulfill({
+        status: 503,
+        json: { error: { message: "Unavailable" } },
+      });
+    } else await route.continue();
+  });
+  await makeQuiz(page);
+  const panel = page.getByRole("complementary", { name: "Question ideas" });
+  await expect(panel.locator(".idea-skeleton")).toHaveCount(3);
+  release();
+  await expect(panel.getByRole("alert")).toContainText("Couldn't load");
+  fail = false;
+  await panel.getByRole("button", { name: "Retry", exact: true }).click();
+  await expect(panel.getByRole("article")).toHaveCount(30);
+  await page.unroute("**/api/v1/question-ideas?**");
+  await page.route("**/api/v1/question-ideas?**", async (route) => {
+    const category = new URL(route.request().url()).searchParams.get(
+      "category",
+    );
+    if (category === "General")
+      await route.fulfill({
+        json: { data: { items: [], total: 0, nextCursor: null } },
+      });
+    else await route.continue();
+  });
+  await panel.getByRole("button", { name: "General", exact: true }).click();
+  await expect(
+    panel.getByText("No ideas in this category yet", { exact: true }),
+  ).toBeVisible();
+  await panel.getByRole("button", { name: "Science", exact: true }).click();
+  await panel.getByRole("button", { name: "Tech", exact: true }).click();
+  await expect(panel.getByRole("article")).toHaveCount(6);
+  for (const card of await panel.getByRole("article").all())
+    await expect(card.getByText("Tech", { exact: true })).toBeVisible();
+  await accessible(page);
+  await page.unroute("**/api/v1/question-ideas?**");
+  await page.route("**/api/v1/question-ideas?**", (route) => {
+    const url = new URL(route.request().url());
+    url.searchParams.set("limit", "2");
+    return route.continue({ url: url.toString() });
+  });
+  await page.reload();
+  await expect(panel.getByRole("article")).toHaveCount(2);
+  await panel
+    .getByRole("button", { name: "Load more ideas", exact: true })
+    .click();
+  await expect(panel.getByRole("article")).toHaveCount(4);
 });

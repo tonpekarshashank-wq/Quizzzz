@@ -9,7 +9,7 @@ Tokens live in [`tokens/tokens.json`](tokens/tokens.json) and [`tokens/tokens.cs
 | `ink` | `#12131A` | All outlines, body text, hard shadows, dark panels |
 | `chalk` | `#F4F2EC` | Page ground |
 | `white` | `#FFFFFF` | Cards, inputs |
-| `cobalt` | `#2B4BFF` | Stage and focus color: question side panel, selections, focus rings, the live preview panel |
+| `cobalt` | `#2B4BFF` | Stage and focus color: question side panel, selections, focus rings, the Question ideas panel |
 | `cobalt-deep` | `#1B30C4` | Track of the countdown fuse on cobalt |
 | `tangerine` | `#FF6A2B` | **Primary action** (Go live, Start game, Join, Next question) |
 | `sun` | `#FFD43B` | Points, timers, bonuses, "2× points" stickers, leader highlight |

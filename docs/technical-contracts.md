@@ -15,6 +15,7 @@ Base `/api/v1`. JSON success `{data, serverTime}`; error `{error:{code,message,f
 | POST /auth/forgot-password | Public, limited | Generic response prevents email enumeration |
 | POST /auth/reset-password | Reset token | One-use reset; revoke old host sessions |
 | GET /auth/me | Host | Host identity |
+| GET /question-ideas | Host | Curated active ideas filtered by category, bounded limit and category-scoped cursor; payload below |
 | GET /quizzes | Host | Own paginated unarchived library |
 | POST /quizzes | Host | Create incomplete draft |
 | GET /quizzes/:id | Owner | Full editable draft and revision |
@@ -123,3 +124,17 @@ Retention of durable reports is a public-release decision. Guest-token expiry an
 ## Question ideas provenance
 
 Editable draft questions may include optional `sourceIdeaId` (up to 80 characters), persisted within existing draft JSONB. The builder uses it to prevent adding the same library idea while its copied question remains in the draft, even after edits or reload. Deleting the copy restores eligibility. Library templates are local static data; copying generates independent question and option UUIDs and follows ordinary revision-safe autosave. No new database migration or runtime canvas scripts are required. Maximum question count remains 100.
+
+## Curated Question ideas API
+
+`GET /api/v1/question-ideas?category=Science&limit=30&cursor=...` requires the existing host session cookie. No AI generation, host-managed lists or imports. Categories are `Science`, `Tech`, `Geography`, `Work safety`, `General`; empty/omitted category or `All` means all. Limit defaults to 30, accepts integers 1–50. Cursor is opaque, exclusive and scoped to the selected category; changing category resets pagination. Results are ordered by unique `sort_order`; only active rows are returned. Invalid filter/limit uses the existing 422 validation response; malformed or category-mismatched cursors return 400 `INVALID_CURSOR`; missing host session returns 401. Stored payloads are validated before return; invalid active content returns 503 `IDEAS_UNAVAILABLE` rather than sending malformed ideas.
+
+Normal envelope:
+
+```json
+{"data":{"items":[{"id":"science-mercury","category":"Science","kind":"mc","prompt":"Which planet is closest to the Sun?","timeSeconds":20,"points":1000,"options":["Mercury","Venus","Earth","Mars"],"correctIndex":0}],"total":6,"nextCursor":null},"serverTime":"UTC ISO timestamp"}
+```
+
+`total` is the full active category count, not the current page size. `nextCursor` is null at the end; otherwise pass it unchanged with the same category. Library changes during paging are not a frozen snapshot. API items obey allowed timer/point values, prompt/answer limits, 2–4 answers and one in-range correct index; True/False options are exactly `True`, `False`. Copied questions get fresh UUIDs and ordinary autosave. No scoring or live-game contracts change.
+
+Migration `006_question_ideas.sql` adds and seeds the approved table. See [library maintenance](question-ideas-maintenance.md).
