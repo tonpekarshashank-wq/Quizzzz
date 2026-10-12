@@ -1,0 +1,40 @@
+CREATE TABLE question_ideas (
+  id text PRIMARY KEY CHECK (length(id) BETWEEN 1 AND 80),
+  category text NOT NULL CHECK (category IN ('Science','Tech','Geography','Work safety','General')),
+  sort_order integer NOT NULL UNIQUE CHECK (sort_order > 0),
+  content jsonb NOT NULL CHECK (jsonb_typeof(content) = 'object'),
+  active boolean NOT NULL DEFAULT true
+);
+CREATE INDEX question_ideas_category_order ON question_ideas(category,sort_order) WHERE active;
+-- Curated starter library. Modify records through reviewed SQL migrations; no AI generation.
+INSERT INTO question_ideas(id,category,sort_order,content) VALUES
+('science-mercury','Science',1,'{"kind": "mc", "prompt": "Which planet is closest to the Sun?", "timeSeconds": 20, "points": 1000, "options": ["Mercury", "Venus", "Earth", "Mars"], "correctIndex": 0}'::jsonb),
+('science-star','Science',2,'{"kind": "tf", "prompt": "The Sun is a star.", "timeSeconds": 10, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('science-symbol','Science',3,'{"kind": "mc", "prompt": "What is the chemical symbol for gold?", "timeSeconds": 30, "points": 2000, "options": ["Ag", "Au", "Fe", "Cu"], "correctIndex": 1}'::jsonb),
+('tech-cpu','Tech',4,'{"kind": "mc", "prompt": "What does CPU stand for?", "timeSeconds": 30, "points": 1000, "options": ["Central Processing Unit", "Computer Power Utility", "Central Program Update", "Control Panel Unit"], "correctIndex": 0}'::jsonb),
+('tech-binary','Tech',5,'{"kind": "tf", "prompt": "Binary numbers use only the digits 0 and 1.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('geography-ocean','Geography',6,'{"kind": "mc", "prompt": "Which ocean is the largest?", "timeSeconds": 20, "points": 1000, "options": ["Atlantic", "Indian", "Pacific", "Arctic"], "correctIndex": 2}'::jsonb),
+('geography-capital','Geography',7,'{"kind": "mc", "prompt": "What is the capital of Japan?", "timeSeconds": 20, "points": 1000, "options": ["Kyoto", "Osaka", "Tokyo", "Sapporo"], "correctIndex": 2}'::jsonb),
+('general-week','General',8,'{"kind": "mc", "prompt": "How many days are in a week?", "timeSeconds": 10, "points": 0, "options": ["Five", "Six", "Seven", "Eight"], "correctIndex": 2}'::jsonb),
+('science-water','Science',9,'{"kind": "mc", "prompt": "What is the chemical formula for water?", "timeSeconds": 20, "points": 1000, "options": ["H2O", "CO2", "O2", "NaCl"], "correctIndex": 0}'::jsonb),
+('science-gravity','Science',10,'{"kind": "mc", "prompt": "Which force pulls objects toward Earth?", "timeSeconds": 20, "points": 1000, "options": ["Gravity", "Magnetism", "Friction", "Buoyancy"], "correctIndex": 0}'::jsonb),
+('science-mammals','Science',11,'{"kind": "tf", "prompt": "Whales are mammals.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('tech-keyboard','Tech',12,'{"kind": "mc", "prompt": "Which device is commonly used to type text into a computer?", "timeSeconds": 20, "points": 1000, "options": ["Keyboard", "Monitor", "Speaker", "Printer"], "correctIndex": 0}'::jsonb),
+('tech-browser','Tech',13,'{"kind": "mc", "prompt": "Which type of software is used to view websites?", "timeSeconds": 20, "points": 1000, "options": ["Web browser", "Spreadsheet", "Image editor", "Calculator"], "correctIndex": 0}'::jsonb),
+('tech-backup','Tech',14,'{"kind": "tf", "prompt": "A backup is an additional copy of data.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('tech-byte','Tech',15,'{"kind": "mc", "prompt": "How many bits are in one byte?", "timeSeconds": 20, "points": 1000, "options": ["Eight", "Four", "Ten", "Sixteen"], "correctIndex": 0}'::jsonb),
+('geography-equator','Geography',16,'{"kind": "mc", "prompt": "Which imaginary line divides Earth into Northern and Southern Hemispheres?", "timeSeconds": 20, "points": 1000, "options": ["Equator", "Prime Meridian", "Arctic Circle", "Tropic of Cancer"], "correctIndex": 0}'::jsonb),
+('geography-continent','Geography',17,'{"kind": "mc", "prompt": "Which continent is the largest by land area?", "timeSeconds": 20, "points": 1000, "options": ["Asia", "Africa", "Europe", "Australia"], "correctIndex": 0}'::jsonb),
+('geography-south','Geography',18,'{"kind": "mc", "prompt": "Which continent contains the South Pole?", "timeSeconds": 20, "points": 1000, "options": ["Antarctica", "Asia", "Africa", "Europe"], "correctIndex": 0}'::jsonb),
+('geography-atlantic','Geography',19,'{"kind": "tf", "prompt": "The Atlantic Ocean lies between the Americas and Europe.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('safety-password','Work safety',20,'{"kind": "mc", "prompt": "Which password practice helps protect accounts?", "timeSeconds": 20, "points": 1000, "options": ["Use a different strong password for each account", "Reuse one password everywhere", "Share passwords in a group chat", "Use your name as every password"], "correctIndex": 0}'::jsonb),
+('safety-phishing','Work safety',21,'{"kind": "mc", "prompt": "What should you do with an unexpected email asking for your password?", "timeSeconds": 20, "points": 1000, "options": ["Report it through your trusted support channel", "Reply with your password", "Forward your password to coworkers", "Click its link and enter your password"], "correctIndex": 0}'::jsonb),
+('safety-lock','Work safety',22,'{"kind": "tf", "prompt": "Locking your screen when you step away helps protect your information.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('safety-code','Work safety',23,'{"kind": "tf", "prompt": "You should share a one-time sign-in code with an unexpected caller.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 1}'::jsonb),
+('safety-recipient','Work safety',24,'{"kind": "mc", "prompt": "Before sending a file containing sensitive information, what should you check?", "timeSeconds": 20, "points": 1000, "options": ["That the intended recipient is authorized to receive it", "That the filename is short", "That the message includes an emoji", "That the file has a colorful icon"], "correctIndex": 0}'::jsonb),
+('safety-update','Work safety',25,'{"kind": "mc", "prompt": "What is a good way to obtain a software security update?", "timeSeconds": 20, "points": 1000, "options": ["Use the official update feature or trusted provider", "Use a link in an unexpected message", "Download the first unknown attachment", "Ask a stranger for an installer"], "correctIndex": 0}'::jsonb),
+('general-triangle','General',26,'{"kind": "mc", "prompt": "How many sides does a triangle have?", "timeSeconds": 20, "points": 1000, "options": ["Three", "Four", "Five", "Six"], "correctIndex": 0}'::jsonb),
+('general-hours','General',27,'{"kind": "mc", "prompt": "How many hours are in one day?", "timeSeconds": 20, "points": 1000, "options": ["24", "12", "30", "60"], "correctIndex": 0}'::jsonb),
+('general-dozen','General',28,'{"kind": "mc", "prompt": "How many items are in a dozen?", "timeSeconds": 20, "points": 1000, "options": ["12", "10", "20", "6"], "correctIndex": 0}'::jsonb),
+('general-even','General',29,'{"kind": "tf", "prompt": "An even integer is divisible by two without a remainder.", "timeSeconds": 20, "points": 1000, "options": ["True", "False"], "correctIndex": 0}'::jsonb),
+('general-months','General',30,'{"kind": "mc", "prompt": "How many months are in one year?", "timeSeconds": 20, "points": 1000, "options": ["12", "10", "14", "24"], "correctIndex": 0}'::jsonb);

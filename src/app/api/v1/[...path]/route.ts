@@ -1,3 +1,4 @@
+import { listQuestionIdeas } from "@/lib/idea-repository";
 import { liveApi } from "@/lib/live-api";
 import { validateOrigin } from "@/lib/origin";
 import { NextRequest, NextResponse } from "next/server";
@@ -233,6 +234,8 @@ async function handle(
       throw new ApiError(404, "NOT_FOUND", "Endpoint not found.");
     }
     const host = await requireHost();
+    if (route === "question-ideas" && method === "GET")
+      return success(await listQuestionIdeas(req.nextUrl.searchParams));
     if (route === "auth/me" && method === "GET") return success(host);
     if (route === "quizzes" && method === "GET") {
       const offset = z.coerce
