@@ -2479,3 +2479,18 @@ summary {
     max-height: 650px;
   }
 }
+.idea-skeleton {
+  min-height: 210px;
+}
+.idea-skeleton div {
+  background: var(--chalk);
+  border-radius: 10px;
+  height: 32px;
+  margin: 16px 0;
+}
+.idea-skeleton div:first-child {
+  width: 55%;
+}
+.idea-more {
+  color: var(--ink);
+}

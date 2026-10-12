@@ -32,6 +32,7 @@ export function Editor({ initial }: { initial: Quiz }) {
   const [ideasVisible, setIdeasVisible] = useState(false);
   const [checks, setChecks] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [addAnnouncement, setAddAnnouncement] = useState("");
   const pendingFocus = useRef<string | null>(null);
   const current = useRef(initial.draft);
   const revision = useRef(initial.revision);
@@ -129,6 +130,9 @@ export function Editor({ initial }: { initial: Quiz }) {
       questions: [...current.current.questions, q],
     });
     setSelected(q.id);
+    setAddAnnouncement(
+      `Question added as number ${current.current.questions.length}`,
+    );
   }
   function add(type: "mc" | "tf") {
     append(newQuestion(type));
@@ -239,6 +243,9 @@ export function Editor({ initial }: { initial: Quiz }) {
           </button>
         </div>
       </header>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {addAnnouncement}
+      </span>
       <main id="main" className="builder">
         <section className="builder-content">
           <Link

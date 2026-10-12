@@ -1,12 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MAX_QUESTIONS, type Question } from "@/lib/model";
 import {
   ideaCategories,
-  questionIdeas,
+  toQuestionIdea,
+  type IdeasPage,
   type IdeaCategory,
   type QuestionIdea,
 } from "@/lib/question-ideas";
+import { api } from "@/lib/client";
 import { AnswerKey, Chip } from "./ui";
 export function QuestionIdeas({
   questions,
@@ -18,9 +20,47 @@ export function QuestionIdeas({
   visible: boolean;
 }) {
   const [category, setCategory] = useState<IdeaCategory>("All");
-  const ideas = questionIdeas.filter(
-    (idea) => category === "All" || idea.category === category,
-  );
+  const [ideas, setIdeas] = useState<QuestionIdea[]>([]);
+  const [total, setTotal] = useState(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const generation = useRef(0);
+  async function load(cursor: string | null, requestId = generation.current) {
+    setLoading(true);
+    setError("");
+    const query = new URLSearchParams({ category, limit: "30" });
+    if (cursor) query.set("cursor", cursor);
+    try {
+      const page = await api<IdeasPage>(`question-ideas?${query}`);
+      if (generation.current !== requestId) return;
+      setIdeas((previous) =>
+        cursor
+          ? [...previous, ...page.items.map(toQuestionIdea)].filter(
+              (item, index, all) =>
+                all.findIndex((i) => i.id === item.id) === index,
+            )
+          : page.items.map(toQuestionIdea),
+      );
+      setTotal(page.total);
+      setNextCursor(page.nextCursor);
+    } catch {
+      if (generation.current === requestId)
+        setError("Couldn't load question ideas. Please try again.");
+    } finally {
+      if (generation.current === requestId) setLoading(false);
+    }
+  }
+  useEffect(() => {
+    const requestId = ++generation.current;
+    setIdeas([]);
+    setTotal(0);
+    setNextCursor(null);
+    void load(null, requestId);
+    return () => {
+      generation.current++;
+    };
+  }, [category]);
   const added = new Set(questions.map((q) => q.sourceIdeaId));
   const full = questions.length >= MAX_QUESTIONS;
   return (
@@ -31,7 +71,7 @@ export function QuestionIdeas({
     >
       <div className="ideas-heading">
         <h2 id="ideas-heading">Question ideas</h2>
-        <Chip>{ideas.length} ideas</Chip>
+        <Chip>{loading && !ideas.length ? "Loading…" : `${total} ideas`}</Chip>
       </div>
       <p className="ideas-help">
         Tap Add to drop one into your quiz. Edit it after.
@@ -54,7 +94,42 @@ export function QuestionIdeas({
           add another.
         </p>
       )}
-      <div className="ideas-list" tabIndex={0} aria-label="Question ideas list">
+      <div
+        className="ideas-list"
+        tabIndex={0}
+        aria-label="Question ideas list"
+        aria-busy={loading}
+      >
+        {loading && (
+          <>
+            <span className="sr-only">Loading question ideas</span>
+            {[0, 1, 2].map((i) => (
+              <div
+                className="card idea-card idea-skeleton"
+                aria-hidden="true"
+                key={`skeleton-${i}`}
+              >
+                <div />
+                <div />
+                <div />
+              </div>
+            ))}
+          </>
+        )}
+        {!loading && !error && ideas.length === 0 && (
+          <p>No ideas in this category yet</p>
+        )}
+        {error && (
+          <div className="card idea-card" role="alert">
+            <p>{error}</p>
+            <button
+              className="button secondary small"
+              onClick={() => void load(ideas.length ? nextCursor : null)}
+            >
+              Retry
+            </button>
+          </div>
+        )}
         {ideas.map((idea) => (
           <article
             className="card idea-card"
@@ -101,6 +176,15 @@ export function QuestionIdeas({
             )}
           </article>
         ))}
+        {nextCursor && !error && (
+          <button
+            className="button secondary small idea-more"
+            disabled={loading}
+            onClick={() => void load(nextCursor)}
+          >
+            Load more ideas
+          </button>
+        )}
       </div>
     </aside>
   );
