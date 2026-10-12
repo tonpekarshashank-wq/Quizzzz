@@ -22,7 +22,7 @@ Room states from the PRD map to screens like this:
 
 **Purpose:** create and edit a quiz quickly.
 
-**Layout:** top bar; center column of question cards; right-hand cobalt panel with a live phone preview.
+**Layout:** top bar; center column of question cards; right-hand cobalt panel of **Question ideas**.
 
 - **Top bar:** logo, quiz name input (1–120 chars), "Autosaved" indicator, primary **Go live**.
 - **Header row:** "N questions", plus an estimate ("about 3 min · up to 6,000 pts each player").
@@ -33,11 +33,18 @@ Room states from the PRD map to screens like this:
 - **Time options:** 10, 20, 30, 60, 90, 120 seconds (default 30).
 - **Points options:** Standard (1,000), Double (2,000), None (0).
 - **Add buttons:** "+ Multiple choice" (4 answers) and "+ True / False" (2 answers). A new card opens immediately.
-- **Live preview:** a phone frame showing the player's view of the open question (question number, points sticker, fuse bar, prompt, answer rows). Updates as the host types.
+- **Question ideas panel (replaces the earlier phone preview):** a scrolling list of ready-made questions, one card below the other, that the host can add to the quiz.
+  - Header "Question ideas", a count badge, and **category chips**: All, Science, Tech, Geography, Work safety, General. Filtering is instant.
+  - Each **idea card** shows: category tag, question type, suggested time and points, the question text, its answers as a compact 2-column grid (key shape and color, the **correct answer marked with a check and a mint tint**), and an **Add** button.
+  - **Add** appends the question to the end of the quiz, opens it in the editor so the host can change anything, and turns the button into a mint **Added** state on that card. Ideas already added cannot be added twice from the panel.
+  - The ideas are a **curated library**, not AI generation (AI question generation is out of scope in PRD §7).
+  - Sample ideas in the design are placeholders; the real library needs content and a category taxonomy (see the handoff doc).
+
+**States to build for the panel:** loading, no ideas in a category, library fetch failed, an idea whose answers are too long (truncate with ellipsis), and "Added" persistence if the host deletes the question later (the card should become addable again).
 
 **States to build:** empty quiz, a card with validation errors (prompt empty, fewer than 2 answers, no correct answer), saving, save failed, 100% of fields at their max length.
 
-**Interactions in the prototype:** open a card, mark correct, change time and points, edit prompt and answers, reorder, add questions.
+**Interactions in the prototype:** open a card, mark correct, change time and points, edit prompt and answers, reorder, add blank questions, filter ideas by category, and add an idea to the quiz.
 
 ### 2. Lobby (`Lobby.dc.html`) [FR-2, FR-3 Lobby state]
 
