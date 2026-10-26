@@ -153,8 +153,19 @@ export function useGame(id: string, token?: string) {
       client?.close();
     };
   }, [id, token, snap?.channelVersion, ended, fatal, refresh]);
+  useEffect(() => {
+    if (!snap?.intro) return;
+    const timer = setTimeout(
+      () => void refresh(),
+      Math.max(
+        0,
+        new Date(snap.intro.endsAt).getTime() - Date.now() - offset + 30,
+      ),
+    );
+    return () => clearTimeout(timer);
+  }, [snap?.intro?.endsAt, offset, refresh]);
   const remaining = snap?.question?.endsAt
     ? Math.max(0, new Date(snap.question.endsAt).getTime() - (now + offset))
     : 0;
-  return { snap, error, fatal, refresh, remaining };
+  return { snap, error, fatal, refresh, remaining, serverNow: now + offset };
 }

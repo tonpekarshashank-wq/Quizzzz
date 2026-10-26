@@ -2,6 +2,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useGame } from "./use-game";
+import {
+  LockInBadge,
+  RevealFact,
+  FinalQuestionIntro,
+} from "./question-moments";
 import { gameApi } from "@/lib/game-client";
 import { ClientError } from "@/lib/client";
 import { AnswerKey, Blob, Chip } from "./ui";
@@ -43,7 +48,10 @@ export function PlayerGame({ id }: { id: string }) {
   return <PlayerSession id={id} token={token} />;
 }
 function PlayerSession({ id, token }: { id: string; token: string }) {
-  const { snap, error, fatal, refresh, remaining } = useGame(id, token);
+  const { snap, error, fatal, refresh, remaining, serverNow } = useGame(
+    id,
+    token,
+  );
   const [pending, setPending] = useState<Answer | null>(null);
   const [submitError, setSubmitError] = useState("");
   const [uncertain, setUncertain] = useState(false);
@@ -182,6 +190,17 @@ function PlayerSession({ id, token }: { id: string; token: string }) {
               Waiting for the host to return.
             </div>
           )}
+        {snap.state === "QUESTION_INTRO" && snap.intro && (
+          <FinalQuestionIntro
+            key={snap.intro.endsAt}
+            endsAt={snap.intro.endsAt}
+            serverNow={serverNow}
+            single={snap.questionCount === 1}
+          />
+        )}
+        {snap.state === "RESULT_REVEAL" && (
+          <RevealFact fact={snap.reveal?.fact} />
+        )}
         {snap.state === "LOBBY" && (
           <>
             <Chip>YOU'RE IN · {snap.playerCount} PLAYERS</Chip>
@@ -207,6 +226,11 @@ function PlayerSession({ id, token }: { id: string; token: string }) {
         )}
         {snap.state === "QUESTION_ACTIVE" && q && (
           <>
+            <LockInBadge
+              key={q.id}
+              remaining={remaining}
+              locked={!!snap.acceptedAnswer}
+            />
             <div className="player-question-meta">
               <Chip>
                 Q {q.index} / {snap.questionCount}

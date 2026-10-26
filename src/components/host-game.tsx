@@ -3,6 +3,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { useGame } from "./use-game";
+import {
+  LockInBadge,
+  RevealFact,
+  FinalQuestionIntro,
+} from "./question-moments";
 import { gameApi } from "@/lib/game-client";
 import { ClientError } from "@/lib/client";
 import { AnswerKey, Blob, Chip } from "./ui";
@@ -15,7 +20,7 @@ import { Confetti } from "./confetti";
 const documentController =
   typeof window === "undefined" ? "" : crypto.randomUUID();
 export function HostGame({ id }: { id: string }) {
-  const { snap, error, fatal, refresh, remaining } = useGame(id);
+  const { snap, error, fatal, refresh, remaining, serverNow } = useGame(id);
   const [controller, setController] = useState("");
   const [generation, setGeneration] = useState(0);
   const [controlError, setControlError] = useState("");
@@ -180,7 +185,7 @@ export function HostGame({ id }: { id: string }) {
             ? "LOBBY"
             : final
               ? "GAME OVER"
-              : `Q ${q?.index} / ${snap.questionCount}`}
+              : `Q ${q?.index ?? snap.intro?.questionIndex} / ${snap.questionCount}`}
         </Chip>
         {!final && (
           <button
@@ -333,6 +338,17 @@ export function HostGame({ id }: { id: string }) {
             </div>
           </>
         )}
+        {snap.state === "QUESTION_INTRO" && snap.intro && (
+          <FinalQuestionIntro
+            key={snap.intro.endsAt}
+            endsAt={snap.intro.endsAt}
+            serverNow={serverNow}
+            single={snap.questionCount === 1}
+          />
+        )}
+        {snap.state === "RESULT_REVEAL" && (
+          <RevealFact fact={snap.reveal?.fact} />
+        )}
         {(snap.state === "QUESTION_ACTIVE" || snap.state === "RESULT_REVEAL") &&
           q && (
             <div className="question-stage">
@@ -348,6 +364,7 @@ export function HostGame({ id }: { id: string }) {
                 <h1>{q.prompt}</h1>
                 {snap.state === "QUESTION_ACTIVE" ? (
                   <>
+                    <LockInBadge key={q.id} remaining={remaining} />
                     <strong className="big-timer">
                       {Math.ceil(remaining / 1000)}
                     </strong>

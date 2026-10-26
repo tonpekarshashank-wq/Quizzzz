@@ -510,6 +510,22 @@ export function Editor({ initial }: { initial: Quiz }) {
                           + Add answer
                         </button>
                       )}
+                      <label className="reveal-fact-editor">
+                        Reveal fact (optional)
+                        <textarea
+                          aria-label={`Question ${i + 1} reveal fact`}
+                          value={q.revealFact ?? ""}
+                          maxLength={160}
+                          onChange={(e) =>
+                            update(q.id, { revealFact: e.target.value })
+                          }
+                          placeholder="A short, accurate fact shown after answers close."
+                        />
+                        <span className="hint">
+                          {(q.revealFact ?? "").length}/160 · Check this fact if
+                          you change the question or correct answer.
+                        </span>
+                      </label>
                       <div className="question-settings">
                         <Segments
                           label="Time"
