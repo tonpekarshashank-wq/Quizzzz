@@ -14,6 +14,7 @@ export type QuestionIdea = {
   category: Exclude<IdeaCategory, "All">;
   type: "mc" | "tf";
   prompt: string;
+  revealFact?: string;
   answers: readonly string[];
   correctIndex: number;
   timeLimit: Question["timeLimit"];
@@ -29,6 +30,7 @@ export function questionFromIdea(idea: QuestionIdea): Question {
     ...question,
     sourceIdeaId: idea.id,
     prompt: idea.prompt,
+    revealFact: idea.revealFact,
     options,
     correctOptionId: options[idea.correctIndex]?.id,
     timeLimit: idea.timeLimit,
@@ -48,6 +50,7 @@ export const ideaItemSchema = z
     ]),
     kind: z.enum(["mc", "tf"]),
     prompt: z.string().min(1).max(250),
+    revealFact: z.string().trim().max(160).optional(),
     timeSeconds: z.union([
       z.literal(10),
       z.literal(20),
@@ -82,6 +85,7 @@ export function toQuestionIdea(item: IdeaItem): QuestionIdea {
     category: item.category,
     type: item.kind,
     prompt: item.prompt,
+    revealFact: item.revealFact,
     answers: [...item.options],
     correctIndex: item.correctIndex,
     timeLimit: item.timeSeconds,

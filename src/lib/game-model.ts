@@ -1,5 +1,6 @@
 export type GameState =
   | "LOBBY"
+  | "QUESTION_INTRO"
   | "QUESTION_ACTIVE"
   | "RESULT_REVEAL"
   | "LEADERBOARD"
@@ -65,6 +66,7 @@ export type Snapshot = {
   theme: string;
   hostAway: boolean;
   question: PublicQuestion | null;
+  intro?: { endsAt: string; questionIndex: number };
   roster?: Player[];
   top: Player[];
   controller?: {
@@ -76,6 +78,7 @@ export type Snapshot = {
   acceptedAnswer?: { submissionId: string; selectedOptionId: string };
   result?: PlayerResult;
   reveal?: {
+    fact?: string;
     correctOptionId: string;
     counts: Record<string, number>;
     unanswered: number;

@@ -30,6 +30,7 @@ type Session = {
   control_generation: number;
   control_expires_at: Date | null;
   host_last_seen_at: Date;
+  intro_ends_at: Date | null;
   ended_at: Date | null;
 };
 type Q = {
@@ -37,6 +38,7 @@ type Q = {
   session_id: string;
   question_index: number;
   prompt: string;
+  reveal_fact: string | null;
   type: "mc" | "tf";
   time_limit: number;
   base_points: number;
@@ -119,7 +121,7 @@ async function emit(c: Connection, s: Session, event: string) {
 async function job(
   c: Connection,
   id: string,
-  kind: "deadline" | "inactivity",
+  kind: "deadline" | "inactivity" | "intro",
   due: Date,
 ) {
   await c.query(
@@ -129,7 +131,7 @@ async function job(
 }
 async function persistState(c: Connection, s: Session) {
   await c.query(
-    "UPDATE quiz_sessions SET state=$2,revision=$3,current_index=$4,theme=$5,ended_at=$6,roster_count=$7,scope_version=$8 WHERE id=$1",
+    "UPDATE quiz_sessions SET state=$2,revision=$3,current_index=$4,theme=$5,ended_at=$6,roster_count=$7,scope_version=$8,intro_ends_at=$9 WHERE id=$1",
     [
       s.id,
       s.state,
@@ -139,6 +141,7 @@ async function persistState(c: Connection, s: Session) {
       s.ended_at,
       s.roster_count,
       s.scope_version,
+      s.intro_ends_at,
     ],
   );
   if (terminal(s.state) && s.state !== "CANCELLED")
@@ -246,8 +249,18 @@ export async function createGame(
       }));
       const correct = options.find((o) => o.source === q.correctOptionId)!.id;
       await c.query(
-        "INSERT INTO session_questions(id,session_id,question_index,prompt,type,time_limit,base_points,correct_option_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
-        [qid, id, i + 1, q.prompt, q.type, q.timeLimit, q.basePoints, correct],
+        "INSERT INTO session_questions(id,session_id,question_index,prompt,type,time_limit,base_points,correct_option_id,reveal_fact) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+        [
+          qid,
+          id,
+          i + 1,
+          q.prompt,
+          q.type,
+          q.timeLimit,
+          q.basePoints,
+          correct,
+          q.revealFact || null,
+        ],
       );
       for (const [j, o] of options.entries())
         await c.query(
@@ -495,6 +508,17 @@ async function closeQuestion(c: Connection, s: Session, q: Q) {
 }
 async function reconcile(c: Connection, s: Session) {
   if (terminal(s.state)) return;
+  if (
+    s.state === "QUESTION_INTRO" &&
+    s.intro_ends_at &&
+    Date.now() >= new Date(s.intro_ends_at).getTime() &&
+    Date.now() - new Date(s.host_last_seen_at).getTime() < 15 * 60000
+  ) {
+    await activateQuestion(c, s, s.current_index);
+    s.revision++;
+    await persistState(c, s);
+    await emit(c, s, "QUESTION_START");
+  }
   const q = await currentQuestion(c, s);
   if (
     s.state === "QUESTION_ACTIVE" &&
@@ -582,6 +606,19 @@ export async function heartbeat(
   return { ok: true };
 }
 async function startQuestion(c: Connection, s: Session, index: number) {
+  const count = (
+    await c.query<{ count: number }>(
+      "SELECT count(*)::int AS count FROM session_questions WHERE session_id=$1",
+      [s.id],
+    )
+  ).rows[0].count;
+  if (index !== count) return activateQuestion(c, s, index);
+  s.current_index = index;
+  s.state = "QUESTION_INTRO";
+  s.intro_ends_at = new Date(Date.now() + 1500);
+  await job(c, s.id, "intro", s.intro_ends_at);
+}
+async function activateQuestion(c: Connection, s: Session, index: number) {
   const now = new Date();
   const q = (
     await c.query<Q>(
@@ -598,6 +635,7 @@ async function startQuestion(c: Connection, s: Session, index: number) {
   );
   s.current_index = index;
   s.state = "QUESTION_ACTIVE";
+  s.intro_ends_at = null;
   await job(c, s.id, "deadline", ends);
 }
 export async function command(
@@ -626,7 +664,10 @@ export async function command(
       ]),
     );
     const prior = (
-      await c.query<{ fingerprint: string; outcome: unknown }>(
+      await c.query<{
+        fingerprint: string;
+        outcome: { state: GameState; revision: number };
+      }>(
         "SELECT * FROM command_receipts WHERE session_id=$1 AND command_id=$2",
         [id, input.commandId],
       )
@@ -775,6 +816,8 @@ export async function submitAnswer(
       !q ||
       q.id !== input.questionId ||
       !q.ends_at ||
+      !q.starts_at ||
+      receivedAt.getTime() < new Date(q.starts_at).getTime() ||
       receivedAt.getTime() >= new Date(q.ends_at).getTime()
     )
       return new ApiError(
@@ -920,28 +963,33 @@ export async function snapshot(id: string, actor: Actor): Promise<Snapshot> {
         !terminal(s.state) &&
         (!s.control_expires_at ||
           new Date(s.control_expires_at).getTime() < Date.now()),
-      question: q
-        ? {
-            id: q.id,
-            index: q.question_index,
-            prompt: q.prompt,
-            type: q.type,
-            timeLimit: q.time_limit,
-            basePoints: q.base_points,
-            startsAt: date(q.starts_at),
-            endsAt: date(q.ends_at),
-            options: options.map((o) => ({
-              id: o.id,
-              label: o.label,
-              key:
-                q.type === "tf"
-                  ? o.option_index === 0
-                    ? 1
-                    : 0
-                  : o.option_index,
-            })),
-          }
-        : null,
+      intro:
+        s.state === "QUESTION_INTRO" && s.intro_ends_at
+          ? { endsAt: date(s.intro_ends_at)!, questionIndex: s.current_index }
+          : undefined,
+      question:
+        q && s.state !== "QUESTION_INTRO"
+          ? {
+              id: q.id,
+              index: q.question_index,
+              prompt: q.prompt,
+              type: q.type,
+              timeLimit: q.time_limit,
+              basePoints: q.base_points,
+              startsAt: date(q.starts_at),
+              endsAt: date(q.ends_at),
+              options: options.map((o) => ({
+                id: o.id,
+                label: o.label,
+                key:
+                  q.type === "tf"
+                    ? o.option_index === 0
+                      ? 1
+                      : 0
+                    : o.option_index,
+              })),
+            }
+          : null,
       top: players
         .filter((p) => p.rank !== null)
         .sort((a, b) => a.rank! - b.rank!)
@@ -981,6 +1029,7 @@ export async function snapshot(id: string, actor: Actor): Promise<Snapshot> {
         ? ps.find((p) => p.id === fastest.participant_id)
         : null;
       output.reveal = {
+        ...(q.reveal_fact ? { fact: q.reveal_fact } : {}),
         correctOptionId: q.correct_option_id,
         counts: Object.fromEntries(
           options.map((o) => [

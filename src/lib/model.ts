@@ -9,6 +9,7 @@ export const questionSchema = z
     sourceIdeaId: z.string().max(80).optional(),
     type: z.enum(["mc", "tf"]),
     prompt: z.string().max(250),
+    revealFact: z.string().trim().max(160).optional(),
     timeLimit: z.union(times.map((t) => z.literal(t))),
     basePoints: z.union(points.map((t) => z.literal(t))),
     options: z.array(optionSchema).min(2).max(4),
