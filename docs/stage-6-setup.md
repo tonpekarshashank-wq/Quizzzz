@@ -8,9 +8,9 @@ Follow the [detailed Neon walkthrough](neon-setup.md) for the exact console sele
 
 Create a staging project in **AWS Asia Pacific (Singapore), `aws-ap-southeast-1`**. See [Neon regions](https://neon.com/docs/introduction/regions). Keep production data separate from staging.
 
-Copy the pooled connection string into `DATABASE_URL`. Keep the direct connection string in `MIGRATION_DATABASE_URL` for migrations. Both must retain the provider's SSL parameters. After loading those variables into your local shell, run `npm run db:migrate`. This applies migrations 001–006 under a migration lock; it does not seed demo accounts. The migration command does not automatically load `.env.local`, so load it through your environment manager first. Do not place credentials in command arguments.
+Copy the pooled connection string into `DATABASE_URL`. Keep the direct connection string in `MIGRATION_DATABASE_URL` for migrations. Both must retain the provider's SSL parameters. After loading those variables into your local shell, run `npm run db:migrate`. This applies migrations 001–007 under a migration lock; it does not seed demo accounts. The migration command does not automatically load `.env.local`, so load it through your environment manager first. Do not place credentials in command arguments.
 
-Verify all six entries in `schema_migrations` using Neon's SQL editor. Do not run migrations against an unintended branch. Before production, document the selected backup/PITR allowance and demonstrate recovery into a separate branch, including accounts, quiz versions, accepted answers and frozen reports. Agree a retention period before scheduling destructive cleanup.
+Verify all seven entries in `schema_migrations` using Neon's SQL editor. Do not run migrations against an unintended branch. Before production, document the selected backup/PITR allowance and demonstrate recovery into a separate branch, including accounts, quiz versions, accepted answers and frozen reports. Agree a retention period before scheduling destructive cleanup.
 
 ## 2. Ably
 

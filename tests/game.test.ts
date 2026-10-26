@@ -56,13 +56,22 @@ async function player(pin: string, name = "Maya") {
 }
 async function action(s: Awaited<ReturnType<typeof setup>>, name: string) {
   const snap = await snapshot(s.room.id, { role: "host", id: owner });
-  return command(s.room.id, owner, {
+  const result = await command(s.room.id, owner, {
     controllerId: s.controllerId,
     generation: s.generation,
     expectedRevision: snap.revision,
     commandId: crypto.randomUUID(),
     action: name,
   });
+  // Existing domain tests begin after the presentation-only intro. New tests below exercise it directly.
+  if (result.state === "QUESTION_INTRO") {
+    await db.query(
+      "UPDATE quiz_sessions SET intro_ends_at=now()-interval '1 second' WHERE id=$1",
+      [s.room.id],
+    );
+    await reconcileSession(s.room.id);
+  }
+  return result;
 }
 test("points rounding and distinct response-time ordering", () => {
   assert.equal(scoreAnswer(1000, 30000, 3000, true).points, 950);
@@ -373,5 +382,208 @@ test("late rejection commits deadline recovery and duplicate jobs finalize only 
     (await db.query("SELECT id FROM live_outbox WHERE delivered_at IS NULL"))
       .rows.length,
     0,
+  );
+});
+
+test("final intro hides content, preserves full answering time, freezes reveal facts and tolerates job retries", async () => {
+  const s = await setup();
+  s.q.revealFact = "A short fact shown only after the question closes.";
+  const quiz = await saveQuiz(
+    owner,
+    s.quiz.id,
+    { ...s.quiz.draft, questions: [s.q] },
+    1,
+  );
+  // A fresh launch captures the new fact; the earlier launch stays immutable.
+  const room = await createGame(
+    owner,
+    {
+      quizId: quiz.id,
+      expectedQuizRevision: quiz.revision,
+      key: crypto.randomUUID(),
+    },
+    "http://localhost:3000",
+  );
+  const guest = await player(room.pin);
+  const controllerId = crypto.randomUUID();
+  const lease = await claimControl(room.id, owner, controllerId);
+  const input = {
+    controllerId,
+    generation: lease.generation,
+    expectedRevision: (await snapshot(room.id, { role: "host", id: owner }))
+      .revision,
+    commandId: crypto.randomUUID(),
+    action: "START_GAME",
+  };
+  const first = await command(room.id, owner, input);
+  assert.equal(first.state, "QUESTION_INTRO");
+  const intro = await snapshot(room.id, { role: "player", token: guest.token });
+  assert.equal(intro.question, null);
+  assert.equal(intro.reveal, undefined);
+  assert.equal(intro.intro?.questionIndex, 1);
+  const deadline = intro.intro!.endsAt;
+  await command(room.id, owner, input);
+  assert.equal(
+    (await snapshot(room.id, { role: "player", token: guest.token })).intro!
+      .endsAt,
+    deadline,
+  );
+  const raw = (
+    await db.query<{
+      id: string;
+      correct_option_id: string;
+      starts_at: Date | null;
+    }>("SELECT * FROM session_questions WHERE session_id=$1", [room.id])
+  ).rows[0];
+  assert.equal(raw.starts_at, null);
+  await assert.rejects(
+    submitAnswer(room.id, guest.token, {
+      questionId: raw.id,
+      selectedOptionId: raw.correct_option_id,
+      submissionId: crypto.randomUUID(),
+    }),
+  );
+  const { runScheduledJob } = await import("../src/lib/live-delivery");
+  const job = (
+    await db.query<{ id: string }>(
+      "SELECT id FROM scheduled_jobs WHERE session_id=$1 AND kind='intro'",
+      [room.id],
+    )
+  ).rows[0];
+  assert.ok(await runScheduledJob(job.id));
+  await db.query(
+    "UPDATE quiz_sessions SET intro_ends_at=now()-interval '5 seconds' WHERE id=$1",
+    [room.id],
+  );
+  await db.query(
+    "UPDATE scheduled_jobs SET due_at=now()-interval '5 seconds' WHERE id=$1",
+    [job.id],
+  );
+  const resumedAt = Date.now();
+  await Promise.all([runScheduledJob(job.id), runScheduledJob(job.id)]);
+  const active = await snapshot(room.id, {
+    role: "player",
+    token: guest.token,
+  });
+  assert.equal(active.state, "QUESTION_ACTIVE");
+  assert.equal(active.intro, undefined);
+  assert.equal(active.reveal, undefined);
+  assert.equal(
+    (active.question as unknown as Record<string, unknown>).revealFact,
+    undefined,
+  );
+  assert.equal(
+    new Date(active.question!.endsAt!).getTime() -
+      new Date(active.question!.startsAt!).getTime(),
+    10000,
+  );
+  assert.ok(new Date(active.question!.startsAt!).getTime() >= resumedAt);
+  await assert.rejects(
+    submitAnswer(
+      room.id,
+      guest.token,
+      {
+        questionId: raw.id,
+        selectedOptionId: raw.correct_option_id,
+        submissionId: crypto.randomUUID(),
+      },
+      new Date(new Date(active.question!.startsAt!).getTime() - 1),
+    ),
+  );
+  const start = active.question!.startsAt;
+  await runScheduledJob(job.id);
+  assert.equal(
+    (await snapshot(room.id, { role: "player", token: guest.token })).question!
+      .startsAt,
+    start,
+  );
+  assert.equal(
+    (
+      await db.query<{ count: number }>(
+        "SELECT count(*)::int AS count FROM scheduled_jobs WHERE session_id=$1 AND kind='deadline'",
+        [room.id],
+      )
+    ).rows[0].count,
+    1,
+  );
+  await saveQuiz(
+    owner,
+    quiz.id,
+    {
+      ...quiz.draft,
+      questions: [{ ...s.q, revealFact: "An edited draft fact." }],
+    },
+    quiz.revision,
+  );
+  await db.query(
+    "UPDATE session_questions SET ends_at=now()-interval '1 second' WHERE session_id=$1",
+    [room.id],
+  );
+  const reveal = await snapshot(room.id, {
+    role: "player",
+    token: guest.token,
+  });
+  assert.equal(reveal.reveal!.fact, s.q.revealFact);
+  assert.equal(
+    (
+      await db.query<{ reveal_fact: string | null }>(
+        "SELECT reveal_fact FROM session_questions WHERE session_id=$1",
+        [s.room.id],
+      )
+    ).rows[0].reveal_fact,
+    null,
+  );
+});
+
+test("only the last question has an intro; interruption during intro does not start a timer", async () => {
+  const s = await setup();
+  const quiz = await saveQuiz(
+    owner,
+    s.quiz.id,
+    { ...s.quiz.draft, questions: [s.q, { ...s.q, id: crypto.randomUUID() }] },
+    1,
+  );
+  const room = await createGame(
+    owner,
+    {
+      quizId: quiz.id,
+      expectedQuizRevision: quiz.revision,
+      key: crypto.randomUUID(),
+    },
+    "http://localhost:3000",
+  );
+  await player(room.pin);
+  const controllerId = crypto.randomUUID(),
+    lease = await claimControl(room.id, owner, controllerId);
+  const act = async (action: string) =>
+    command(room.id, owner, {
+      controllerId,
+      generation: lease.generation,
+      expectedRevision: (await snapshot(room.id, { role: "host", id: owner }))
+        .revision,
+      commandId: crypto.randomUUID(),
+      action,
+    });
+  assert.equal((await act("START_GAME")).state, "QUESTION_ACTIVE");
+  await db.query(
+    "UPDATE session_questions SET ends_at=now()-interval '1 second' WHERE session_id=$1 AND question_index=1",
+    [room.id],
+  );
+  await act("SHOW_LEADERBOARD");
+  assert.equal((await act("NEXT_QUESTION")).state, "QUESTION_INTRO");
+  const intro = await snapshot(room.id, { role: "host", id: owner });
+  assert.equal(intro.intro?.questionIndex, 2);
+  await act("END_EARLY");
+  await reconcileSession(room.id);
+  const final = await snapshot(room.id, { role: "host", id: owner });
+  assert.equal(final.state, "INTERRUPTED");
+  assert.equal(
+    (
+      await db.query<{ starts_at: Date | null }>(
+        "SELECT starts_at FROM session_questions WHERE session_id=$1 AND question_index=2",
+        [room.id],
+      )
+    ).rows[0].starts_at,
+    null,
   );
 });

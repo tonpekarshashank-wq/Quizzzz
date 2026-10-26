@@ -206,7 +206,7 @@ Operator defaults, adjustable after shared-Wi-Fi tests: 1200 join attempts/IP/mi
 
 ### States and control
 
-LOBBY → QUESTION_ACTIVE → RESULT_REVEAL → LEADERBOARD → next QUESTION_ACTIVE or COMPLETED. COMPLETED renders final podium. CANCELLED/INTERRUPTED are terminal. Recovery status is an overlay, not a separate question state. Start requires at least one player. No early reveal/skip: question closes on its deadline even if everyone answered. Host reveals leaderboard and advances, or finishes after last leaderboard. Show fewer winners if fewer than three players. Play again creates a fresh lobby with a new join flow.
+LOBBY → QUESTION_ACTIVE → RESULT_REVEAL → LEADERBOARD → next QUESTION_ACTIVE or COMPLETED. The final question (including a single-question quiz) enters QUESTION_INTRO for at least 1.5 seconds before QUESTION_ACTIVE; its full answering timer starts only when the server activates it. COMPLETED renders final podium. CANCELLED/INTERRUPTED are terminal. Recovery status is an overlay, not a separate question state. Start requires at least one player. No early reveal/skip: question closes on its deadline even if everyone answered. Host reveals leaderboard and advances, or finishes after last leaderboard. Show fewer winners if fewer than three players. Play again creates a fresh lobby with a new join flow.
 
 One renewable host-control lease (30s, renewed every 10s foregrounded) fences commands with a generation. Another authenticated device explicitly takes over; old commands are rejected. Host loss/backgrounding lets active question finish then holds progression. Fifteen minutes without host heartbeat closes as INTERRUPTED; preserve partial results without champion celebration. Lobby cancel is CANCELLED; early ending after start is INTERRUPTED.
 
@@ -237,3 +237,11 @@ CSV includes score/rank and per-question option/status/correctness/time/points; 
 Measure state commit-to-render p95 <200ms in defined APJ Wi-Fi/4G profile; record command/API latency separately. Warm API p95 <150ms target, report cold starts separately. Validate 500 players joining from shared IP, 500 answers in two seconds, duplicate retries, deadline races, host takeover/backgrounding, reconnection, process/deployment changes and provider outages. Test two simultaneous 500-player rooms separately from per-room capacity. Verify exact scores/ranks agree across snapshots, displays and CSV.
 
 Host cookies must be secure/HttpOnly with CSRF checks for writes; ownership and guest/realtime scopes enforced server-side. Cache TTL never deletes reports. Secret/token logging prohibited. Transactional event delivery uses durable outbox and deduplication. Provider plans/throughput/connection quotas and APJ availability must pass integration checks. Data retention/deletion policy remains a public-release decision; use synthetic data before then.
+
+
+### Question presentation enhancements
+
+- During the last three positive seconds of an active question, host and player screens show a server-synchronised "Lock it in! 3–2–1" badge. Players with an accepted answer see "Answer locked ✓". No score or deadline changes; no badge at zero.
+- Questions may include a creator-reviewed reveal fact, up to 160 characters. It is optional for backward compatibility, copied independently from curated ideas and frozen at game launch. Display it at the top of host/player reveal screens; wrap on mobile. Do not deliver facts in player snapshots before question closure.
+- Before the last question, show "FINAL QUESTION" ("ONE QUESTION. MAKE IT COUNT." for a one-question quiz). A durable, server-controlled QUESTION_INTRO phase hides the prompt/options, rejects answers and ends after a persisted 1.5-second minimum. Activation starts the full answer duration; delayed jobs do not consume it. A late/reconnecting client displays only the remaining intro. Animation is decorative, with a static reduced-motion variant.
+- Ending or timing out a session during the introduction does not start or score the unplayed question. PIN reservation and host fencing apply during QUESTION_INTRO too.

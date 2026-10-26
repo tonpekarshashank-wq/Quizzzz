@@ -49,8 +49,8 @@ async function setup() {
   );
   const controllerId = crypto.randomUUID(),
     lease = await claimControl(room.id, owner, controllerId);
-  const act = async (action: string) =>
-    command(room.id, owner, {
+  const act = async (action: string) => {
+    const result = await command(room.id, owner, {
       controllerId,
       generation: lease.generation,
       expectedRevision: (await snapshot(room.id, { role: "host", id: owner }))
@@ -58,6 +58,15 @@ async function setup() {
       commandId: crypto.randomUUID(),
       action,
     });
+    if (result.state === "QUESTION_INTRO") {
+      await db.query(
+        "UPDATE quiz_sessions SET intro_ends_at=now()-interval '1 second' WHERE id=$1",
+        [room.id],
+      );
+      await reconcileSession(room.id);
+    }
+    return result;
+  };
   const join = async (nickname: string) =>
     joinGame({
       pin: room.pin,

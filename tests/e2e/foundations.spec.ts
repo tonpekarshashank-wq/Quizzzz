@@ -45,6 +45,9 @@ test("mobile authoring persists, true/false, reorder, delete and archive", async
     .click();
   await page.getByLabel("Question 2 prompt").fill("The Sun is a star.");
   await page
+    .getByLabel("Question 2 reveal fact")
+    .fill("The Sun produces energy through nuclear fusion.");
+  await page
     .getByRole("button", { name: "Mark answer 1 correct for question 2" })
     .click();
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
@@ -55,6 +58,9 @@ test("mobile authoring persists, true/false, reorder, delete and archive", async
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
   await page.reload();
   await expect(page.getByLabel("Quiz name")).toHaveValue("Friday science");
+  await expect(page.getByLabel("Question 1 reveal fact")).toHaveValue(
+    "The Sun produces energy through nuclear fusion.",
+  );
   await accessible(page);
   await page
     .getByRole("button", { name: "Edit question", exact: false })
@@ -355,6 +361,25 @@ test("question ideas filter, copy independently, persist provenance and enforce 
     path: "test-results/ideas-desktop.png",
     fullPage: true,
   });
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
+  await expect(
+    panel.getByRole("button", { name: "All", exact: true }),
+  ).toBeInViewport();
+  await panel.getByRole("button", { name: "Science", exact: true }).click();
+  await panel
+    .getByRole("article", {
+      name: "What is the chemical symbol for gold?",
+      exact: true,
+    })
+    .getByRole("button", { name: /^Add:/ })
+    .click();
+  await expect(page.getByLabel("Question 3 prompt")).toBeFocused();
+  await expect(
+    panel.getByRole("button", { name: "Science", exact: true }),
+  ).toBeInViewport();
+  await expect(page.getByRole("status")).toHaveText("✓ Saved");
   const quiz = (await (await page.request.get(`/api/v1/quizzes/${id}`)).json())
     .data;
   expect(quiz.draft.questions[0].sourceIdeaId).toBe("science-mercury");

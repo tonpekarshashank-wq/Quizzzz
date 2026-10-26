@@ -138,3 +138,16 @@ Normal envelope:
 `total` is the full active category count, not the current page size. `nextCursor` is null at the end; otherwise pass it unchanged with the same category. Library changes during paging are not a frozen snapshot. API items obey allowed timer/point values, prompt/answer limits, 2–4 answers and one in-range correct index; True/False options are exactly `True`, `False`. Copied questions get fresh UUIDs and ordinary autosave. No scoring or live-game contracts change.
 
 Migration `006_question_ideas.sql` adds and seeds the approved table. See [library maintenance](question-ideas-maintenance.md).
+
+
+## Question presentation extension (migration 007)
+
+Question drafts and curated idea API items accept optional `revealFact` (trimmed string, maximum 160 characters). Blank or missing facts are omitted at reveal. Launch copies it into `session_questions.reveal_fact`; later draft/library edits do not change a running session. Host-only draft and idea endpoints retain their existing authentication. Session snapshots expose the frozen value only as `reveal.fact` after closure; it never appears on `question` or in invalidation notices.
+
+The final question uses `QUESTION_INTRO` before `QUESTION_ACTIVE`, including a one-question quiz. During introduction `question` is null (for both roles), and `intro` is `{endsAt: UTC_ISO, questionIndex: number}`. No prompt, options or fact are exposed. The room's `current_index` identifies the upcoming question; `quiz_sessions.intro_ends_at` persists the shared deadline. An `intro` scheduled job invokes the existing idempotent reconciliation path. Snapshot/control reconciliation also recovers overdue intros.
+
+At expiry, under the session lock, activate once: clear intro deadline, set actual starts_at=now and ends_at=starts_at+full duration, increment revision, emit a safe QUESTION_START invalidation and schedule the normal deadline job. A retry cannot reset starts_at. If the host is already inactive for 15 minutes, interrupt without activating. END_EARLY during intro also leaves the question unstarted. The live PIN index includes QUESTION_INTRO. No new score multipliers or ranking changes.
+
+New answer receipts before starts_at are rejected as well as those at/after ends_at. Existing identical accepted-answer retries retain their original acknowledgement. Clients derive final-three-second feedback from the existing server clock offset; the badge never authorises an answer or changes a deadline. Clients refresh at the introduction deadline and retain polling/Ably recovery.
+
+The one-line fun fact is allowed to wrap on small screens. Last-three-second announcements occur once, not on every clock tick. The final banner starts at its elapsed animation position on reload and is static under prefers-reduced-motion.

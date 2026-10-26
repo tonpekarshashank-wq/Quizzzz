@@ -35,6 +35,8 @@ test("host and mobile player complete a game with reload and lost acknowledgemen
               id: crypto.randomUUID(),
               type: "mc",
               prompt: "Closest planet to the Sun?",
+              revealFact:
+                "Mercury is the innermost planet in our solar system.",
               timeLimit: 10,
               basePoints: 1000,
               options,
@@ -74,8 +76,22 @@ test("host and mobile player complete a game with reload and lost acknowledgemen
   await page.setViewportSize({ width: 320, height: 844 });
   await page.getByRole("button", { name: "Start game" }).click();
   await expect(
+    page.getByRole("heading", {
+      name: "ONE QUESTION. MAKE IT COUNT.",
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  await expect(
     player.getByRole("button", { name: "Mercury", exact: false }),
   ).toBeVisible();
+  const liveSnapshot = await page.evaluate(
+    async (id) =>
+      (await (await fetch(`/api/v1/sessions/${id}/snapshot`)).json()).data,
+    sessionId,
+  );
+  expect(liveSnapshot.reveal).toBeUndefined();
+  expect(liveSnapshot.question.revealFact).toBeUndefined();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -89,7 +105,12 @@ test("host and mobile player complete a game with reload and lost acknowledgemen
       await route.abort("failed");
     } else await route.fulfill({ response });
   });
+  await expect(page.locator(".lock-badge")).toHaveText(/Lock it in! [123]/, {
+    timeout: 12000,
+  });
+  await expect(player.locator(".lock-badge")).toHaveText(/Lock it in! [123]/);
   await player.getByRole("button", { name: "Mercury", exact: false }).click();
+  await expect(player.locator(".lock-badge")).toHaveText("Answer locked ✓");
   await expect(player.getByRole("status")).toContainText("Locked in");
   await player.reload();
   await expect(player.getByRole("status")).toContainText("Locked in");
@@ -101,6 +122,17 @@ test("host and mobile player complete a game with reload and lost acknowledgemen
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await expect(
+    player.getByText("Mercury is the innermost planet in our solar system.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Mercury is the innermost planet in our solar system.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await accessible(player);
   await player.screenshot({
     path: "test-results/player-result.png",
     fullPage: true,
@@ -198,4 +230,107 @@ test("host and mobile player complete a game with reload and lost acknowledgemen
     (await player.request.get(`/api/reports/${sessionId}/csv`)).status(),
   ).toBe(401);
   await guest.close();
+});
+
+test("final question intro precedes the timer, supports reduced motion and remains accessible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/register");
+  await page.getByLabel("Your name").fill("Final host");
+  await page
+    .getByLabel("Email", { exact: true })
+    .fill(`final-${crypto.randomUUID()}@example.com`);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("quizzzz-test-password");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/quizzes$/);
+  const id = await page.evaluate(async () => {
+    const questions = ["First question", "Last question"].map((prompt) => {
+      const options = ["True", "False"].map((label) => ({
+        id: crypto.randomUUID(),
+        label,
+      }));
+      return {
+        id: crypto.randomUUID(),
+        type: "tf",
+        prompt,
+        revealFact: "A fact for the reveal.",
+        timeLimit: 10,
+        basePoints: 1000,
+        options,
+        correctOptionId: options[0].id,
+      };
+    });
+    const response = await fetch("/api/v1/quizzes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        draft: {
+          title: "Final intro",
+          description: "",
+          language: "en",
+          coverImageUrl: "",
+          questions,
+        },
+      }),
+    });
+    return (await response.json()).data.id;
+  });
+  await page.goto(`/quizzes/${id}`);
+  await page.getByRole("button", { name: "Go live", exact: false }).click();
+  await expect(page).toHaveURL(/\/host\//);
+  const sessionId = page.url().split("/").at(-1)!;
+  await page.evaluate(async (id) => {
+    const snap = (await (await fetch(`/api/v1/sessions/${id}/snapshot`)).json())
+      .data;
+    await fetch("/api/v1/sessions/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pin: snap.pin,
+        nickname: "Test player",
+        avatar: { body: 0, mood: "smile" },
+        joinRequestId: crypto.randomUUID(),
+      }),
+    });
+  }, sessionId);
+  await expect(page.getByRole("button", { name: "Start game" })).toBeEnabled();
+  await page.getByRole("button", { name: "Start game" }).click();
+  await expect(
+    page.getByRole("heading", { name: "First question", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "See the leaderboard" }),
+  ).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: "See the leaderboard" }).click();
+  await page
+    .getByRole("button", { name: "Next question", exact: false })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "FINAL QUESTION", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Last question", exact: true }),
+  ).not.toBeVisible();
+  expect(
+    await page
+      .locator(".final-question-banner")
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("none");
+  await page.screenshot({
+    path: "test-results/final-question-intro.png",
+    fullPage: true,
+  });
+  await expect(
+    page.getByRole("heading", { name: "Last question", exact: true }),
+  ).toBeVisible({ timeout: 5000 });
+  await accessible(page);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

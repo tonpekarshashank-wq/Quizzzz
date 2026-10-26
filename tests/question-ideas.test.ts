@@ -19,11 +19,13 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
   assert.equal(page.nextCursor, null);
   assert.equal(new Set(page.items.map((i) => i.id)).size, 30);
   for (const item of page.items) {
+    assert.ok(item.revealFact && item.revealFact.length <= 160);
     const idea = toQuestionIdea(item),
       a = questionFromIdea(idea),
       b = questionFromIdea(idea);
     assert.notEqual(a.id, b.id);
     assert.notEqual(a.options[0].id, b.options[0].id);
+    assert.equal(a.revealFact, item.revealFact);
     assert.equal(a.correctOptionId, a.options[idea.correctIndex].id);
     const draft = draftSchema.parse({ ...emptyDraft, questions: [a] });
     assert.deepEqual(launchErrors(draft), []);

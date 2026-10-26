@@ -214,6 +214,14 @@ async function main() {
     game.snap = await good(`sessions/${game.id}/snapshot`, "GET", undefined, {
       host: true,
     });
+    const waitUntil = Date.now() + 15000;
+    while (game.snap.state === "QUESTION_INTRO" && Date.now() < waitUntil) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      game.snap = await good(`sessions/${game.id}/snapshot`, "GET", undefined, {
+        host: true,
+      });
+    }
+    assert.equal(game.snap.state, "QUESTION_ACTIVE");
     assert.equal(game.snap.question.correctOptionId, undefined);
   }
   const burstStart = performance.now();

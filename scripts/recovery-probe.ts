@@ -51,6 +51,10 @@ if (process.argv[2] === "seed") {
     commandId: crypto.randomUUID(),
     action: "START_GAME",
   });
+  await db.query(
+    "UPDATE quiz_sessions SET intro_ends_at=now()-interval '1 second' WHERE id=$1 AND state='QUESTION_INTRO'",
+    [room.id],
+  );
   const active = await snapshot(room.id, {
     role: "player",
     token: player.token,
@@ -69,11 +73,88 @@ if (process.argv[2] === "seed") {
     "UPDATE scheduled_jobs SET due_at=now()-interval '1 second' WHERE session_id=$1 AND kind='deadline'",
     [room.id],
   );
-  await writeFile(file, JSON.stringify({ owner, room, player, answer, ack }));
+  const introRoom = await createGame(
+    owner,
+    { quizId: quiz.id, expectedQuizRevision: 1, key: crypto.randomUUID() },
+    "http://localhost:3000",
+  );
+  const introLease = await claimControl(introRoom.id, owner, controllerId);
+  const introPlayer = await joinGame({
+    pin: introRoom.pin,
+    nickname: "Intro recovery",
+    avatar: { body: 0, mood: "smile" },
+    joinRequestId: crypto.randomUUID(),
+  });
+  await command(introRoom.id, owner, {
+    controllerId,
+    generation: introLease.generation,
+    expectedRevision: (
+      await snapshot(introRoom.id, { role: "host", id: owner })
+    ).revision,
+    commandId: crypto.randomUUID(),
+    action: "START_GAME",
+  });
+  await writeFile(
+    file,
+    JSON.stringify({
+      owner,
+      room,
+      player,
+      answer,
+      ack,
+      introRoom,
+      introPlayer,
+    }),
+  );
   console.log("Synthetic answer committed; process exiting before closure.");
 } else {
-  const { owner, room, player, answer, ack } = JSON.parse(
-    await readFile(file, "utf8"),
+  const { owner, room, player, answer, ack, introRoom, introPlayer } =
+    JSON.parse(await readFile(file, "utf8"));
+  assert.equal(
+    (
+      await db.query<{ state: string }>(
+        "SELECT state FROM quiz_sessions WHERE id=$1",
+        [introRoom.id],
+      )
+    ).rows[0].state,
+    "QUESTION_INTRO",
+  );
+  assert.equal(
+    (
+      await db.query<{ starts_at: Date | null }>(
+        "SELECT starts_at FROM session_questions WHERE session_id=$1",
+        [introRoom.id],
+      )
+    ).rows[0].starts_at,
+    null,
+  );
+  await db.query(
+    "UPDATE quiz_sessions SET intro_ends_at=now()-interval '1 second' WHERE id=$1",
+    [introRoom.id],
+  );
+  await db.query(
+    "UPDATE scheduled_jobs SET due_at=now()-interval '1 second' WHERE session_id=$1 AND kind='intro'",
+    [introRoom.id],
+  );
+  const introJob = (
+    await db.query<{ id: string }>(
+      "SELECT id FROM scheduled_jobs WHERE session_id=$1 AND kind='intro'",
+      [introRoom.id],
+    )
+  ).rows[0];
+  await Promise.all([
+    runScheduledJob(introJob.id),
+    runScheduledJob(introJob.id),
+  ]);
+  const resumed = await snapshot(introRoom.id, {
+    role: "player",
+    token: introPlayer.token,
+  });
+  assert.equal(resumed.state, "QUESTION_ACTIVE");
+  assert.equal(
+    new Date(resumed.question!.endsAt!).getTime() -
+      new Date(resumed.question!.startsAt!).getTime(),
+    10000,
   );
   const jobs = (
     await db.query<{ id: string }>(

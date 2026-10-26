@@ -156,3 +156,8 @@ The sample shows a different player (sky blob) than the correct screen because i
 ## Design language sheet (`Foundations.dc.html`)
 
 A one-page reference of the palette, type, the six blobs, answer keys and button styles. See [`design-system.md`](design-system.md).
+
+
+### Question presentation additions
+
+Use the existing sticker design, sun countdown badge, mint reveal strip and display fonts. Final-three-second badges reserve layout space and show Accepted-answer confirmation on locked player screens. Reveal facts sit above question/results content and wrap on phones. A non-interactive sun banner appears during the final-question intro; the prompt/options remain hidden until the answering phase. Static reduced-motion styling uses the same server duration. See [question presentation](../docs/question-presentation.md).

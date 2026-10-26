@@ -18,3 +18,5 @@ Stage 6 now includes local recovery, accessibility and load hardening. See [vali
 - [API, realtime, recovery and persistence contracts](docs/technical-contracts.md)
 - [Responsive and missing-state UI specification](UI%20Design/stage-1-ux.md)
 - [Original UI design references](UI%20Design/README.md)
+
+Question presentation now includes last-three-second feedback, optional reveal facts and a server-timed final-question intro. See [implementation and migration 007](docs/question-presentation.md).
