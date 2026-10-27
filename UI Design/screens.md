@@ -37,9 +37,9 @@ Room states from the PRD map to screens like this:
 
 Replaces the phone preview. Desktop uses the right-hand cobalt column; at mobile widths a **Question ideas** toggle reveals it below the question list (supports 320px).
 
-- Database-backed curated library, not AI generation (PRD §7). Prototype samples are placeholders; the implementation seeds 30 ideas, six per content category, loaded through the host-authenticated API; skeleton, empty category, inline Retry and pagination states.
+- Database-backed curated library, not AI generation (PRD §7). Prototype samples are placeholders; the implementation contains 32 ideas: six per original content category and two Sports ideas, loaded through the host-authenticated API; skeleton, empty category, inline Retry and pagination states.
 - Header, filtered count badge and help: "Tap Add to drop one into your quiz. Edit it after."
-- Category toggle chips: All (default), Science, Tech, Geography, Work safety, General; instant filtering with `aria-pressed`.
+- Category toggle chips: All (default), Science, Tech, Geography, Work safety, General, Sports; instant filtering with `aria-pressed`.
 - Vertically scrolling sticker cards show category/type, allowed time/points, prompt and a 2-column answer grid using existing shape/color keys. Correct answer has a check and mint tint.
 - **Add** appends an independent editable copy, opens it, scrolls it into view and focuses its prompt. Uses normal revision-safe autosave.
 - A non-interactive mint **✓ Added** state prevents duplicates while that question exists, including after editing/reload. Deleting the copied question restores Add.

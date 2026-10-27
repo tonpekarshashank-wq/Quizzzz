@@ -289,6 +289,19 @@ test("question ideas filter, copy independently, persist provenance and enforce 
     .click();
   const panel = page.getByRole("complementary", { name: "Question ideas" });
   await expect(panel.getByRole("article")).toHaveCount(30);
+  await expect(panel.getByText("32 ideas", { exact: true })).toBeVisible();
+  await panel.getByRole("button", { name: "Sports", exact: true }).click();
+  await expect(panel.getByRole("article")).toHaveCount(2);
+  await expect(
+    panel.getByRole("button", { name: "Sports", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    panel.getByRole("article", {
+      name: "In cricket, what is a hat-trick?",
+      exact: true,
+    }),
+  ).toBeVisible();
+
   await panel.getByRole("button", { name: "Science", exact: true }).click();
   await expect(
     panel.getByRole("button", { name: "Science", exact: true }),
@@ -380,10 +393,30 @@ test("question ideas filter, copy independently, persist provenance and enforce 
     panel.getByRole("button", { name: "Science", exact: true }),
   ).toBeInViewport();
   await expect(page.getByRole("status")).toHaveText("✓ Saved");
+  await panel.getByRole("button", { name: "Sports", exact: true }).click();
+  const tennis = panel.getByRole("article", {
+    name: "In tennis, what word means a score of zero?",
+    exact: true,
+  });
+  await tennis.getByRole("button", { name: /^Add:/ }).click();
+  await expect(page.getByLabel("Question 4 prompt")).toBeFocused();
+  await expect(page.getByLabel("Question 4 reveal fact")).toHaveValue(
+    "A score of 15–0 is called fifteen-love.",
+  );
+  await expect(page.getByRole("status")).toHaveText("✓ Saved");
+  await page.reload();
+  await panel.getByRole("button", { name: "Sports", exact: true }).click();
+  await expect(tennis.getByText("✓ Added", { exact: true })).toBeVisible();
   const quiz = (await (await page.request.get(`/api/v1/quizzes/${id}`)).json())
     .data;
   expect(quiz.draft.questions[0].sourceIdeaId).toBe("science-mercury");
   expect(quiz.draft.questions[1].sourceIdeaId).toBe("science-star");
+  expect(quiz.draft.questions[3].sourceIdeaId).toBe("sports-tennis-love");
+  expect(
+    quiz.draft.questions[3].options.find(
+      (o: { id: string }) => o.id === quiz.draft.questions[3].correctOptionId,
+    ).label,
+  ).toBe("Love");
   const template = quiz.draft.questions[0];
   quiz.draft.questions = Array.from({ length: 100 }, () => {
     const options = template.options.map((o: { label: string }) => ({

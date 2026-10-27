@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { newQuestion, questionSchema, type Question } from "./model";
-export const ideaCategories = [
-  "All",
+export const contentCategories = [
   "Science",
   "Tech",
   "Geography",
   "Work safety",
   "General",
+  "Sports",
 ] as const;
+export const ideaCategories = ["All", ...contentCategories] as const;
 export type IdeaCategory = (typeof ideaCategories)[number];
 export type QuestionIdea = {
   id: string;
@@ -41,13 +42,7 @@ export function questionFromIdea(idea: QuestionIdea): Question {
 export const ideaItemSchema = z
   .object({
     id: z.string().min(1).max(80),
-    category: z.enum([
-      "Science",
-      "Tech",
-      "Geography",
-      "Work safety",
-      "General",
-    ]),
+    category: z.enum(contentCategories),
     kind: z.enum(["mc", "tf"]),
     prompt: z.string().min(1).max(250),
     revealFact: z.string().trim().max(160).optional(),

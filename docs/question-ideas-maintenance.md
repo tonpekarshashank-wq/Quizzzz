@@ -17,7 +17,7 @@ SELECT name FROM schema_migrations ORDER BY name;
 SELECT category, count(*) FROM question_ideas WHERE active GROUP BY category ORDER BY category;
 ```
 
-Expect migration `006_question_ideas.sql` and six rows per content category.
+Expect migrations through `008_sports_question_ideas.sql`: six rows in each original category and two Sports rows, 32 active ideas in total.
 
 Each row has a stable text `id`, a category, unique positive `sort_order`, JSONB `content` and an `active` flag. Content has `kind`, `prompt`, `timeSeconds`, `points`, `options`, `correctIndex`. Stable IDs are used by copied draft questions to prevent duplicates; do not recycle an ID for an unrelated idea. Existing copied questions remain independent when library content changes.
 
@@ -36,3 +36,10 @@ The Work safety category contains general account-security and data-handling adv
 ## Validation
 
 21 unit/integration tests passed. Ten Chromium browser scenarios passed (nine in the full run and the corrected loading/retry/empty/pagination scenario in a focused rerun). Builder checks cover 320px, 390px and desktop overflow, accessible controls, adding at the end, prompt focus, saved provenance, delete/re-add and the question limit. Typecheck, formatting, whitespace checks and production build passed. This repository has no configured lint command; formatting/type checks are reported separately, not as lint. Hosted Neon/Ably capacity validation remains outside this builder change.
+
+
+## Sports category
+
+Migration 008 expands the category constraint and appends only the two reviewed Sports ideas: cricket hat-trick and tennis love. Each has one correct answer, a reveal fact, 20 seconds and 1,000 base points. The earlier ten mixed-category proposals are not seeded. API and builder categories share a single source of truth. The default 30-item page is unchanged; Sports can be accessed directly through its filter or on the next All page.
+
+Cricket references: [ICC on the hat-trick](https://www.icc-cricket.com/news/tracing-the-origins-of-the-hat-trick), [ICC example across two overs](https://www.icc-cricket.com/tournaments/t20cricketworldcup/news/cummins-creates-history-with-second-consecutive-t20-world-cup-hat-trick). Tennis reference: [USTA scoring rules](https://www.usta.com/en/home/improve/tips-and-instruction/national/tennis-scoring-rules.html).

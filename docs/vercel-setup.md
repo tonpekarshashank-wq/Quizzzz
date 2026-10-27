@@ -33,7 +33,7 @@ Expected output includes both paths if those files exist. Do not upload environm
 Complete [Neon setup](neon-setup.md) and [Ably setup](ably-setup.md). Have these available privately:
 
 - Neon **pooled** connection URL for the staging database.
-- Confirmation that migrations 001–007 were applied to that same database.
+- Confirmation that migrations 001–008 were applied to that same database.
 - Complete Ably staging API key, with Publish/Subscribe permissions restricted to `quizzzz:staging:*`.
 
 Vercel does not automatically copy your local `.env.local` or create the database schema. No Neon Marketplace integration is necessary for this manual connection method.
@@ -163,7 +163,7 @@ Schema changes remain an explicit migration step against the intended Neon datab
 | No framework detected / no `package.json` | Confirm implementation was pushed to GitHub and Root Directory is the repository root. |
 | Build fails | Read Build Logs; confirm `package-lock.json`, code and Workflow configuration are committed. Share a redacted error, not credentials. |
 | Health returns 503 | Confirm pooled `DATABASE_URL` is valid in Production and redeploy. Inspect runtime logs for connection errors. |
-| Missing database table | Apply all seven migrations to the database used by the deployment. |
+| Missing database table | Apply all eight migrations to the database used by the deployment. |
 | Signup says origin not permitted | Use the stable domain and set exact HTTPS `APP_ORIGIN`, then redeploy. |
 | Launch says live services are unavailable | Confirm `ABLY_API_KEY`, `WORKFLOW_ENABLED=true` and stable `GAME_TOKEN_SECRET` are set on the deployed environment. |
 | Player gets Vercel login screen | Check the domain's Deployment Protection scope; use the intended tester-accessible stable domain. |
@@ -175,7 +175,7 @@ Schema changes remain an explicit migration step against the intended Neon datab
 
 - GitHub contains the application and no credentials.
 - Deployment is Ready at the stable domain, with the correct exact origin.
-- Neon has seven migrations; host/quiz data persists.
+- Neon has eight migrations; host/quiz data persists.
 - Host and phone player can complete a small game using Ably.
 - Workflow execution is proven without browser requests.
 - Email recovery, monitoring and backup/restore remain tracked until tested.

@@ -14,10 +14,10 @@ import { draftSchema, emptyDraft, launchErrors } from "../src/lib/model";
 process.env.DATA_DIR = await mkdtemp(path.join(tmpdir(), "quizzzz-ideas-"));
 test("all database-seeded ideas are valid independent copies; category/cursor pagination is bounded", async () => {
   const page = await listQuestionIdeas(new URLSearchParams({ limit: "50" }));
-  assert.equal(page.total, 30);
-  assert.equal(page.items.length, 30);
+  assert.equal(page.total, 32);
+  assert.equal(page.items.length, 32);
   assert.equal(page.nextCursor, null);
-  assert.equal(new Set(page.items.map((i) => i.id)).size, 30);
+  assert.equal(new Set(page.items.map((i) => i.id)).size, 32);
   for (const item of page.items) {
     assert.ok(item.revealFact && item.revealFact.length <= 160);
     const idea = toQuestionIdea(item),
@@ -36,9 +36,21 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
   }
   for (const category of ideaCategories.slice(1)) {
     const filtered = await listQuestionIdeas(new URLSearchParams({ category }));
-    assert.equal(filtered.total, 6);
+    assert.equal(filtered.total, category === "Sports" ? 2 : 6);
     assert(filtered.items.every((i) => i.category === category));
   }
+  const sports = await listQuestionIdeas(
+    new URLSearchParams({ category: "Sports" }),
+  );
+  assert.deepEqual(
+    sports.items.map((i) => i.options[i.correctIndex]),
+    ["Three wickets taken by a bowler on consecutive deliveries", "Love"],
+  );
+  assert(
+    sports.items.every(
+      (i) => i.timeSeconds === 20 && i.points === 1000 && i.revealFact,
+    ),
+  );
   const ids: string[] = [];
   let cursor: string | null = null;
   do {
@@ -74,7 +86,7 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
   await db.query("UPDATE question_ideas SET active=false WHERE id=$1", [
     row.id,
   ]);
-  assert.equal((await listQuestionIdeas(new URLSearchParams())).total, 29);
+  assert.equal((await listQuestionIdeas(new URLSearchParams())).total, 31);
   await db.query(
     "UPDATE question_ideas SET active=true, content=jsonb_set(content,'{correctIndex}','99'::jsonb) WHERE id=$1",
     [row.id],

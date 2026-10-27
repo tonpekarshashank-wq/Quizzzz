@@ -127,7 +127,7 @@ Editable draft questions may include optional `sourceIdeaId` (up to 80 character
 
 ## Curated Question ideas API
 
-`GET /api/v1/question-ideas?category=Science&limit=30&cursor=...` requires the existing host session cookie. No AI generation, host-managed lists or imports. Categories are `Science`, `Tech`, `Geography`, `Work safety`, `General`; empty/omitted category or `All` means all. Limit defaults to 30, accepts integers 1–50. Cursor is opaque, exclusive and scoped to the selected category; changing category resets pagination. Results are ordered by unique `sort_order`; only active rows are returned. Invalid filter/limit uses the existing 422 validation response; malformed or category-mismatched cursors return 400 `INVALID_CURSOR`; missing host session returns 401. Stored payloads are validated before return; invalid active content returns 503 `IDEAS_UNAVAILABLE` rather than sending malformed ideas.
+`GET /api/v1/question-ideas?category=Science&limit=30&cursor=...` requires the existing host session cookie. No AI generation, host-managed lists or imports. Categories are `Science`, `Tech`, `Geography`, `Work safety`, `General`, `Sports`; empty/omitted category or `All` means all. Limit defaults to 30, accepts integers 1–50. Cursor is opaque, exclusive and scoped to the selected category; changing category resets pagination. Results are ordered by unique `sort_order`; only active rows are returned. Invalid filter/limit uses the existing 422 validation response; malformed or category-mismatched cursors return 400 `INVALID_CURSOR`; missing host session returns 401. Stored payloads are validated before return; invalid active content returns 503 `IDEAS_UNAVAILABLE` rather than sending malformed ideas.
 
 Normal envelope:
 
@@ -151,3 +151,5 @@ At expiry, under the session lock, activate once: clear intro deadline, set actu
 New answer receipts before starts_at are rejected as well as those at/after ends_at. Existing identical accepted-answer retries retain their original acknowledgement. Clients derive final-three-second feedback from the existing server clock offset; the badge never authorises an answer or changes a deadline. Clients refresh at the introduction deadline and retain polling/Ably recovery.
 
 The one-line fun fact is allowed to wrap on small screens. Last-three-second announcements occur once, not on every clock tick. The final banner starts at its elapsed animation position on reload and is static under prefers-reduced-motion.
+
+Migration `008_sports_question_ideas.sql` expands the category constraint to Sports and appends two reviewed ideas (cricket hat-trick and tennis love), each with a reveal fact, 20-second timer and 1,000 points. The library now contains 32 ideas. All remains a filter, giving seven chips for six content categories. The first page still defaults to 30; Load more or the Sports filter makes the two new records accessible.
