@@ -17,7 +17,7 @@ SELECT name FROM schema_migrations ORDER BY name;
 SELECT category, count(*) FROM question_ideas WHERE active GROUP BY category ORDER BY category;
 ```
 
-Expect migrations through `008_sports_question_ideas.sql`: six rows in each original category and two Sports rows, 32 active ideas in total.
+Expect migrations through `009_reviewed_question_ideas.sql`: Science 8, Tech 8, Geography 8, Work safety 7, General 9 and Sports 2; 42 active ideas in total.
 
 Each row has a stable text `id`, a category, unique positive `sort_order`, JSONB `content` and an `active` flag. Content has `kind`, `prompt`, `timeSeconds`, `points`, `options`, `correctIndex`. Stable IDs are used by copied draft questions to prevent duplicates; do not recycle an ID for an unrelated idea. Existing copied questions remain independent when library content changes.
 
@@ -40,6 +40,13 @@ The Work safety category contains general account-security and data-handling adv
 
 ## Sports category
 
-Migration 008 expands the category constraint and appends only the two reviewed Sports ideas: cricket hat-trick and tennis love. Each has one correct answer, a reveal fact, 20 seconds and 1,000 base points. The earlier ten mixed-category proposals are not seeded. API and builder categories share a single source of truth. The default 30-item page is unchanged; Sports can be accessed directly through its filter or on the next All page.
+Migration 008 expands the category constraint and appends only the two reviewed Sports ideas: cricket hat-trick and tennis love. Each has one correct answer, a reveal fact, 20 seconds and 1,000 base points. The earlier ten mixed-category proposals were not part of migration 008; migration 009 below adds them. API and builder categories share a single source of truth. The default 30-item page is unchanged; Sports can be accessed directly through its filter or on the next All page.
 
 Cricket references: [ICC on the hat-trick](https://www.icc-cricket.com/news/tracing-the-origins-of-the-hat-trick), [ICC example across two overs](https://www.icc-cricket.com/tournaments/t20cricketworldcup/news/cummins-creates-history-with-second-consecutive-t20-world-cup-hat-trick). Tennis reference: [USTA scoring rules](https://www.usta.com/en/home/improve/tips-and-instruction/national/tennis-scoring-rules.html).
+
+
+## Reviewed mixed-category expansion
+
+Migration 009 appends the ten previously reviewed proposals: GPS, photosynthesis, the Colosseum, chess knight, Queen, wireless router, payment verification, Machu Picchu, al dente and the heart. Each retains its reviewed options, correct answer and reveal fact, with 20 seconds and 1,000 points. Combined with Sports, there are now 42 active ideas. Existing IDs/content and applied migrations are unchanged. All uses its existing 30-item page; Load more reveals the remainder.
+
+Sources checked for the specialised facts: [NIST on GPS](https://www.nist.gov/how-do-you-measure-it/how-do-you-measure-your-location-using-gps), [Queen's official history](https://www.queenonline.com/queen), [Oxford on al dente](https://www.oxfordlearnersdictionaries.com/us/definition/english/al-dente_2).

@@ -289,7 +289,7 @@ test("question ideas filter, copy independently, persist provenance and enforce 
     .click();
   const panel = page.getByRole("complementary", { name: "Question ideas" });
   await expect(panel.getByRole("article")).toHaveCount(30);
-  await expect(panel.getByText("32 ideas", { exact: true })).toBeVisible();
+  await expect(panel.getByText("42 ideas", { exact: true })).toBeVisible();
   await panel.getByRole("button", { name: "Sports", exact: true }).click();
   await expect(panel.getByRole("article")).toHaveCount(2);
   await expect(
@@ -306,7 +306,7 @@ test("question ideas filter, copy independently, persist provenance and enforce 
   await expect(
     panel.getByRole("button", { name: "Science", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect(panel.getByRole("article")).toHaveCount(6);
+  await expect(panel.getByRole("article")).toHaveCount(8);
   const mercury = panel.getByRole("article", {
     name: "Which planet is closest to the Sun?",
     exact: true,
@@ -486,7 +486,7 @@ test("question ideas skeleton, retry, empty category and stale responses", async
   ).toBeVisible();
   await panel.getByRole("button", { name: "Science", exact: true }).click();
   await panel.getByRole("button", { name: "Tech", exact: true }).click();
-  await expect(panel.getByRole("article")).toHaveCount(6);
+  await expect(panel.getByRole("article")).toHaveCount(8);
   for (const card of await panel.getByRole("article").all())
     await expect(card.getByText("Tech", { exact: true })).toBeVisible();
   await accessible(page);

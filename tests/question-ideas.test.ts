@@ -8,16 +8,16 @@ import { listQuestionIdeas } from "../src/lib/idea-repository";
 import {
   questionFromIdea,
   toQuestionIdea,
-  ideaCategories,
+  contentCategories,
 } from "../src/lib/question-ideas";
 import { draftSchema, emptyDraft, launchErrors } from "../src/lib/model";
 process.env.DATA_DIR = await mkdtemp(path.join(tmpdir(), "quizzzz-ideas-"));
 test("all database-seeded ideas are valid independent copies; category/cursor pagination is bounded", async () => {
   const page = await listQuestionIdeas(new URLSearchParams({ limit: "50" }));
-  assert.equal(page.total, 32);
-  assert.equal(page.items.length, 32);
+  assert.equal(page.total, 42);
+  assert.equal(page.items.length, 42);
   assert.equal(page.nextCursor, null);
-  assert.equal(new Set(page.items.map((i) => i.id)).size, 32);
+  assert.equal(new Set(page.items.map((i) => i.id)).size, 42);
   for (const item of page.items) {
     assert.ok(item.revealFact && item.revealFact.length <= 160);
     const idea = toQuestionIdea(item),
@@ -34,9 +34,19 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
     assert.notEqual(b.options[0].label, "Edited");
     assert.notEqual(item.options[0], "Edited");
   }
-  for (const category of ideaCategories.slice(1)) {
+  for (const category of contentCategories) {
     const filtered = await listQuestionIdeas(new URLSearchParams({ category }));
-    assert.equal(filtered.total, category === "Sports" ? 2 : 6);
+    assert.equal(
+      filtered.total,
+      {
+        Science: 8,
+        Tech: 8,
+        Geography: 8,
+        "Work safety": 7,
+        General: 9,
+        Sports: 2,
+      }[category],
+    );
     assert(filtered.items.every((i) => i.category === category));
   }
   const sports = await listQuestionIdeas(
@@ -51,6 +61,26 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
       (i) => i.timeSeconds === 20 && i.points === 1000 && i.revealFact,
     ),
   );
+  const approvedAnswers = {
+    "tech-gps": "Global Positioning System",
+    "science-photosynthesis": "Carbon dioxide",
+    "geography-colosseum": "Rome",
+    "general-chess-knight": "Knight",
+    "general-bohemian-rhapsody": "Queen",
+    "tech-wireless-router": "Wireless router",
+    "safety-payment-verification":
+      "Verify through a known, trusted contact method",
+    "geography-machu-picchu": "Peru",
+    "general-al-dente": "Firm to the bite",
+    "science-heart": "Heart",
+  };
+  for (const [id, answer] of Object.entries(approvedAnswers)) {
+    const item = page.items.find((i) => i.id === id)!;
+    assert.ok(item);
+    assert.equal(item.options[item.correctIndex], answer);
+    assert.equal(item.timeSeconds, 20);
+    assert.equal(item.points, 1000);
+  }
   const ids: string[] = [];
   let cursor: string | null = null;
   do {
@@ -86,7 +116,7 @@ test("all database-seeded ideas are valid independent copies; category/cursor pa
   await db.query("UPDATE question_ideas SET active=false WHERE id=$1", [
     row.id,
   ]);
-  assert.equal((await listQuestionIdeas(new URLSearchParams())).total, 31);
+  assert.equal((await listQuestionIdeas(new URLSearchParams())).total, 41);
   await db.query(
     "UPDATE question_ideas SET active=true, content=jsonb_set(content,'{correctIndex}','99'::jsonb) WHERE id=$1",
     [row.id],

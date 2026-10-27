@@ -80,7 +80,7 @@ FROM schema_migrations
 ORDER BY name;
 ```
 
-Expect these eight migration names:
+Expect these nine migration names:
 
 ```text
 001_foundations.sql
@@ -91,6 +91,7 @@ Expect these eight migration names:
 006_question_ideas.sql
 007_question_presentation.sql
 008_sports_question_ideas.sql
+009_reviewed_question_ideas.sql
 ```
 
 Then inspect the tables:
@@ -102,7 +103,7 @@ WHERE table_schema = 'public'
 ORDER BY table_name;
 ```
 
-Among the results you should see `users`, `quizzes`, `quiz_sessions`, `participants`, `responses`, `question_results`, `live_outbox`, `scheduled_jobs`, `player_ratings` and `question_ideas`. Seeing eight recorded migrations in Neon, rather than only the terminal success message, confirms the intended database was migrated.
+Among the results you should see `users`, `quizzes`, `quiz_sessions`, `participants`, `responses`, `question_results`, `live_outbox`, `scheduled_jobs`, `player_ratings` and `question_ideas`. Seeing nine recorded migrations in Neon, rather than only the terminal success message, confirms the intended database was migrated.
 
 ## 7. Connect Vercel when ready
 
@@ -135,7 +136,7 @@ These counts should increase after the corresponding app actions. The health end
 | Migration failed | Recopy the direct URL, confirm the selected branch has a read-write compute, retain SSL parameters and check your network permits PostgreSQL connections. Do not print credential values while debugging. |
 | Terminal says success but Neon has no tables | Verify the SQL editor's branch/database and that the command explicitly loaded `.env.neon`. |
 | Vercel health returns 503 | Check `DATABASE_URL` is set in the environment actually deployed, then redeploy. Inspect server logs without sharing credentials. |
-| App says a table/relation does not exist | Apply all eight migrations to the same database used by Vercel. |
+| App says a table/relation does not exist | Apply all nine migrations to the same database used by Vercel. |
 | Signup says origin is not permitted | Set `APP_ORIGIN` to the exact deployed HTTPS origin and redeploy; this is an app origin setting, not a Neon setting. |
 
 Before production, create a separately managed production database, confirm backup/restore coverage and exercise recovery. Keep synthetic load data separate from real user records. Hosted 500-player capacity remains an open validation step.

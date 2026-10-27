@@ -153,3 +153,5 @@ New answer receipts before starts_at are rejected as well as those at/after ends
 The one-line fun fact is allowed to wrap on small screens. Last-three-second announcements occur once, not on every clock tick. The final banner starts at its elapsed animation position on reload and is static under prefers-reduced-motion.
 
 Migration `008_sports_question_ideas.sql` expands the category constraint to Sports and appends two reviewed ideas (cricket hat-trick and tennis love), each with a reveal fact, 20-second timer and 1,000 points. The library now contains 32 ideas. All remains a filter, giving seven chips for six content categories. The first page still defaults to 30; Load more or the Sports filter makes the two new records accessible.
+
+Migration `009_reviewed_question_ideas.sql` appends ten approved multiple-choice questions and their reveal facts. The current library total is 42, with category counts Science 8, Tech 8, Geography 8, Work safety 7, General 9 and Sports 2. No API or scoring changes; pagination remains 30 by default.
