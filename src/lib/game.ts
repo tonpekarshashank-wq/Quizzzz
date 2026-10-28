@@ -725,7 +725,10 @@ export async function command(
         (t) => s.current_index === 1 || t !== s.theme,
       );
       s.theme = themes[randomInt(themes.length)];
-    } else if (input.action === "NEXT_QUESTION" && s.state === "LEADERBOARD") {
+    } else if (
+      input.action === "NEXT_QUESTION" &&
+      (s.state === "LEADERBOARD" || s.state === "RESULT_REVEAL")
+    ) {
       await startQuestion(c, s, s.current_index + 1);
     } else if (input.action === "FINISH_GAME" && s.state === "LEADERBOARD") {
       const count = (

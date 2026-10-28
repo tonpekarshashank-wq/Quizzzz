@@ -406,13 +406,24 @@ export function HostGame({ id }: { id: string }) {
                     ) : (
                       <p>No correct answers this round. Next one's yours.</p>
                     )}
-                    <button
-                      className="button primary"
-                      disabled={!canAct}
-                      onClick={() => void act("SHOW_LEADERBOARD")}
-                    >
-                      See the leaderboard ↗
-                    </button>
+                    <div className="reveal-actions">
+                      <button
+                        className="button primary"
+                        disabled={!canAct}
+                        onClick={() => void act("SHOW_LEADERBOARD")}
+                      >
+                        See the leaderboard ↗
+                      </button>
+                      {q.index < snap.questionCount && (
+                        <button
+                          className="button"
+                          disabled={!canAct}
+                          onClick={() => void act("NEXT_QUESTION")}
+                        >
+                          Next Question ↗
+                        </button>
+                      )}
+                    </div>
                   </>
                 )}
               </section>

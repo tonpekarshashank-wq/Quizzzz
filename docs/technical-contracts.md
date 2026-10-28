@@ -64,11 +64,13 @@ Database receipt/deadline precision and lock contention are part of the Stage 3 
 | LOBBY | CANCEL | CANCELLED |
 | QUESTION_ACTIVE | Deadline job/API reconciliation | RESULT_REVEAL; finalized stats and ranks |
 | RESULT_REVEAL | SHOW_LEADERBOARD | LEADERBOARD; stored theme selected once |
-| LEADERBOARD, more questions | NEXT_QUESTION | QUESTION_ACTIVE |
+| RESULT_REVEAL or LEADERBOARD, more questions | NEXT_QUESTION | QUESTION_ACTIVE (QUESTION_INTRO before the final question) |
 | LEADERBOARD, last question | FINISH_GAME | COMPLETED; final awards/reports |
 | Any nonterminal started game | END_EARLY or inactivity | INTERRUPTED |
 | LOBBY | Inactivity | INTERRUPTED with no question metrics |
 | Any terminal state | Any advancement | Reject; same original command retry returns original outcome |
+
+The host may skip the intermediate leaderboard using Next Question from the reveal. The last reveal keeps See the leaderboard and the existing final-results flow. Skipping does not change finalized scores or ranks; no database migration is required.
 
 Command revision check, lease fencing, state update and command receipt/outbox insertion occur atomically. Accepted answers do not increment the command stateRevision; counters have separate event sequencing. Deadline closure does not require host lease. Stale/duplicate jobs compare session/question/deadline IDs and cannot close a newer question. Inactivity job compares hostLastSeenAt and reschedules if host returned. If interruption occurs during a question, close and finalize that question first, including committed answers; remaining future questions are not included in partial metrics.
 

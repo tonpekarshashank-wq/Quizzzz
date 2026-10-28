@@ -1445,6 +1445,15 @@ summary {
   border-radius: 14px;
   text-align: center;
 }
+.reveal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reveal-actions > .button {
+  white-space: normal;
+  max-width: 100%;
+}
 .host-action {
   display: flex;
   justify-content: flex-end;

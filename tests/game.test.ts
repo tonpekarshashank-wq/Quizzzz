@@ -569,7 +569,6 @@ test("only the last question has an intro; interruption during intro does not st
     "UPDATE session_questions SET ends_at=now()-interval '1 second' WHERE session_id=$1 AND question_index=1",
     [room.id],
   );
-  await act("SHOW_LEADERBOARD");
   assert.equal((await act("NEXT_QUESTION")).state, "QUESTION_INTRO");
   const intro = await snapshot(room.id, { role: "host", id: owner });
   assert.equal(intro.intro?.questionIndex, 2);
@@ -586,4 +585,23 @@ test("only the last question has an intro; interruption during intro does not st
     ).rows[0].starts_at,
     null,
   );
+});
+
+test("next question cannot advance during answering or beyond the final reveal", async () => {
+  const s = await setup();
+  await player(s.room.pin);
+  await action(s, "START_GAME");
+  await assert.rejects(action(s, "NEXT_QUESTION"));
+  await db.query(
+    "UPDATE session_questions SET ends_at=now()-interval '1 second' WHERE session_id=$1",
+    [s.room.id],
+  );
+  await reconcileSession(s.room.id);
+  await assert.rejects(action(s, "NEXT_QUESTION"), /no more questions/i);
+  assert.equal(
+    (await snapshot(s.room.id, { role: "host", id: owner })).state,
+    "RESULT_REVEAL",
+  );
+  await action(s, "SHOW_LEADERBOARD");
+  assert.equal((await action(s, "FINISH_GAME")).state, "COMPLETED");
 });
