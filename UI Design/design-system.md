@@ -28,12 +28,12 @@ Rules:
 
 | Key | Color | Shape | Shape fill |
 | :--- | :--- | :--- | :--- |
-| 1 | `tangerine` | Triangle | ink |
+| 1 | `tangerine` | Heart | ink |
 | 2 | `cobalt` | Diamond | **white** (ink on cobalt fails contrast) |
-| 3 | `sun` | Circle | ink |
-| 4 | `mint` | Square | ink |
+| 3 | `sun` | Spade | ink |
+| 4 | `mint` | Club | ink |
 
-True/False questions use key 2 (diamond, cobalt) for **True** and key 1 (triangle, tangerine) for **False**.
+True/False questions use key 2 (diamond, cobalt) for **True** and key 1 (heart, tangerine) for **False**.
 
 ### Blob body colors
 

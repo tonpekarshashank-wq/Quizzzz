@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFE6FF"/><stop offset="1" stop-color="#F4F2EC"/></linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+<circle cx="600" cy="140" r="50" fill="#FFF3B8"/>
+<path d="M0 320 140 220 260 300 400 190 540 300 680 210 800 290V600H0z" fill="#9CC9C0"/>
+<path d="M0 380 120 310 260 380 400 300 560 390 700 320 800 380V600H0z" fill="#6BB08A"/>
+<g fill="#2F7A55"><path d="M60 480 100 390 140 480z"/><path d="M90 520 140 410 190 520z"/><path d="M230 500 270 400 310 500z"/><path d="M520 490 560 390 600 490z"/><path d="M660 520 710 410 760 520z"/><path d="M590 540 640 430 690 540z"/></g>
+<g fill="#1F5C42"><path d="M0 560 60 440 120 560z"/><path d="M150 590 220 440 290 590z"/><path d="M330 600 410 430 490 600z"/><path d="M520 600 600 450 680 600z"/><path d="M700 600 770 450 840 600z"/></g>
+<g fill="#7A4B2A"><rect x="214" y="580" width="12" height="20"/><rect x="404" y="590" width="12" height="10"/></g>
+<path d="M0 450c140-20 260 10 400 0s280-30 400-10v80c-120 20-260-10-400 4S140 520 0 530z" fill="#fff" opacity="0.35"/>
+</svg>

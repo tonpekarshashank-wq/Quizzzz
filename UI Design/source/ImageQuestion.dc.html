@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Image questions prototype</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;800&family=Instrument+Sans:wght@500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,input,textarea{font-family:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid #2B4BFF;outline-offset:3px}
+.dark button:focus-visible{outline-color:#FFD43B}
+.mono{font-family:'DM Mono',monospace}
+.disp{font-family:'Bricolage Grotesque',sans-serif;font-weight:800}
+.sb{border:3px solid #12131A;border-radius:16px;box-shadow:4px 4px 0 #12131A;color:#12131A;transition:transform .08s}
+.sb:active{transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+.sb[disabled]{opacity:.45;box-shadow:none;cursor:not-allowed}
+.prim{background:#FF6A2B;font-family:'Bricolage Grotesque',sans-serif;font-weight:800}
+.sec{background:#fff;font-weight:700}
+.dash{background:transparent;border-style:dashed;box-shadow:none;font-weight:700}
+.row{transition:transform .08s, opacity .2s}
+.row:active:not([disabled]){transform:translate(3px,3px);box-shadow:0 0 0 #12131A !important}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pop{0%{transform:scale(.8);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .35s ease-out both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.grow{transform-origin:left;animation:grow .8s cubic-bezier(.2,.9,.3,1) both}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.bob{animation:bob 2.4s ease-in-out infinite}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;left:0;top:0}
+.fl:focus-within{outline:3px solid #2B4BFF;outline-offset:3px}
+.rm *{animation:none !important;transition:none !important}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div class="{{ rmCls }}" style="width:1440px;height:960px;box-sizing:border-box;background:#F4F2EC;color:#12131A;font-family:'Instrument Sans',sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <!-- Prototype console -->
+  <div class="dark" style="flex:none;height:88px;box-sizing:border-box;background:#12131A;color:#fff;padding:10px 24px 8px;display:flex;flex-direction:column;gap:6px;border-bottom:3px solid #12131A">
+    <div style="display:flex;align-items:center;gap:18px">
+      <span class="mono" style="font-size:12px;letter-spacing:2px;color:#FFD43B;white-space:nowrap">PROTOTYPE · IMAGE QUESTIONS</span>
+      <div style="display:flex;gap:6px" role="group" aria-label="Flow steps">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+          <button onClick="{{ s.go }}" aria-pressed="{{ s.on }}" disabled="{{ s.dis }}" style="opacity:{{ s.op }};height:34px;padding:0 12px;border-radius:10px;border:2px solid {{ s.edge }};background:{{ s.bg }};color:{{ s.ink }};font-weight:700;font-size:13px;white-space:nowrap">{{ s.n }} {{ s.label }}</button>
+        </sc-for>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;letter-spacing:1px;color:#B9BCCB">LOADING</span>
+        <div style="display:flex" role="group" aria-label="Loading speed">
+          <sc-for list="{{ loadSeg }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.pick }}" aria-pressed="{{ g.on }}" style="height:32px;padding:0 10px;border:2px solid #fff;margin-left:-2px;background:{{ g.bg }};color:{{ g.ink }};font-weight:700;font-size:13px">{{ g.label }}</button></sc-for>
+        </div></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;letter-spacing:1px;color:#B9BCCB">PLAYER IMAGE</span>
+        <div style="display:flex" role="group" aria-label="Image result">
+          <sc-for list="{{ failSeg }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.pick }}" aria-pressed="{{ g.on }}" style="height:32px;padding:0 10px;border:2px solid #fff;margin-left:-2px;background:{{ g.bg }};color:{{ g.ink }};font-weight:700;font-size:13px">{{ g.label }}</button></sc-for>
+        </div></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;letter-spacing:1px;color:#B9BCCB">PHONE</span>
+        <div style="display:flex" role="group" aria-label="Phone width">
+          <sc-for list="{{ wideSeg }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.pick }}" aria-pressed="{{ g.on }}" style="height:32px;padding:0 10px;border:2px solid #fff;margin-left:-2px;background:{{ g.bg }};color:{{ g.ink }};font-weight:700;font-size:13px">{{ g.label }}</button></sc-for>
+        </div></div>
+      <button onClick="{{ toggleMotion }}" aria-pressed="{{ rm }}" style="height:32px;padding:0 10px;border-radius:8px;border:2px solid #fff;background:{{ rmBg }};color:{{ rmInk }};font-weight:700;font-size:13px;white-space:nowrap">Reduce motion</button>
+      <button onClick="{{ restart }}" style="height:32px;padding:0 12px;border-radius:8px;border:2px solid #FFD43B;background:transparent;color:#FFD43B;font-weight:700;font-size:13px">Restart</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:13px;font-weight:600;color:#D7DAE6">{{ hint }}</span>
+      <sc-if value="{{ canSkip }}" hint-placeholder-val="{{ false }}"><button onClick="{{ skipTimer }}" style="height:26px;padding:0 10px;border-radius:8px;border:2px solid #fff;background:transparent;color:#fff;font-weight:700;font-size:12px">Jump to 3 s left</button></sc-if>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;letter-spacing:1px;color:#B9BCCB">UPLOAD</span>
+        <div style="display:flex" role="group" aria-label="Upload result">
+          <sc-for list="{{ upSeg }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.pick }}" aria-pressed="{{ g.on }}" style="height:26px;padding:0 10px;border:2px solid #fff;margin-left:-2px;background:{{ g.bg }};color:{{ g.ink }};font-weight:700;font-size:12px">{{ g.label }}</button></sc-for>
+        </div></div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0">
+
+    <!-- HOST SIDE -->
+    <div style="flex:1;min-width:0;padding:18px 20px 18px 24px;display:flex;flex-direction:column;gap:8px">
+      <span class="mono" style="font-size:12px;letter-spacing:2px;color:#3B4152">{{ hostLabel }}</span>
+      <div style="position:relative;flex:1;min-height:0;border:3px solid #12131A;border-radius:24px;background:{{ hostBg }};box-shadow:6px 6px 0 #12131A;overflow:hidden">
+
+        <!-- Host: builder -->
+        <sc-if value="{{ hBuild }}" hint-placeholder-val="{{ true }}">
+          <div style="height:100%;box-sizing:border-box;padding:20px 24px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="mono" style="font-size:14px;background:#2B4BFF;color:#fff;border:2.5px solid #12131A;border-radius:10px;padding:4px 10px">Q3</span>
+              <span class="mono" style="font-size:12px;letter-spacing:1px">MULTIPLE CHOICE</span>
+              <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ false }}"><span class="mono pop" style="font-size:11px;letter-spacing:1px;background:#8FD3FF;border:2px solid #12131A;border-radius:7px;padding:1px 8px">IMAGE QUESTION</span></sc-if>
+              <div style="flex:1"></div>
+              <span class="mono" style="font-size:12px;color:#3B4152">{{ chars }}/250</span>
+              <sc-if value="{{ playBlocked }}" hint-placeholder-val="{{ false }}"><span id="play-note" role="status" style="max-width:250px;font-size:12px;font-weight:700;line-height:1.3;color:#3B4152;text-align:right">{{ playNote }}</span></sc-if>
+              <button class="sb prim" onClick="{{ playIt }}" disabled="{{ playBlocked }}" aria-describedby="play-note" style="height:44px;padding:0 20px;font-size:17px;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 3 21 12 6 21z" fill="#12131A"/></svg>Play this question</button>
+            </div>
+            <textarea value="{{ prompt }}" onChange="{{ setPrompt }}" aria-label="Question prompt" rows="2" style="resize:none;border:0;border-bottom:3px solid #12131A;background:#fff;border-radius:12px 12px 0 0;padding:10px 14px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;line-height:1.15;color:#12131A;width:100%;box-sizing:border-box"></textarea>
+
+            <div style="display:flex;gap:18px;align-items:flex-start">
+              <div style="flex:none;width:310px;display:flex;flex-direction:column;gap:8px">
+                <sc-if value="{{ noImage }}" hint-placeholder-val="{{ false }}">
+                  <div style="width:310px;height:232px;box-sizing:border-box;border:3px dashed #12131A;border-radius:18px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:0 20px">
+                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
+                    <button class="sb prim" onClick="{{ openPicker }}" style="height:46px;padding:0 20px;font-size:17px;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add image</button>
+                    <span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">Optional. Choose from our library or upload a JPEG, PNG or WebP.</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ upBusy }}" hint-placeholder-val="{{ false }}">
+                  <div role="group" aria-label="Image upload" style="width:310px;height:232px;box-sizing:border-box;border:3px solid #12131A;border-radius:18px;background:#fff;box-shadow:5px 5px 0 #FFD43B;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:12px">
+                    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>
+                      <div style="min-width:0;display:flex;flex-direction:column"><span style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ upName }}</span><span class="mono" style="font-size:12px;color:#3B4152">{{ upSize }}</span></div>
+                    </div>
+                    <div role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ upPct }}" style="height:16px;border:2.5px solid #12131A;border-radius:999px;background:#F4F2EC;overflow:hidden"><div class="{{ upBarCls }}" style="height:100%;width:{{ upPct }}%;background:{{ upBarBg }}"></div></div>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span role="status" style="font-weight:700;font-size:14px">{{ upLabel }}</span><span class="mono" aria-hidden="true" style="font-size:13px">{{ upPctLabel }}</span></div>
+                    <button class="sb sec" onClick="{{ cancelUpload }}" autoFocus="true" style="height:40px;font-size:15px">Cancel</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ upFailed }}" hint-placeholder-val="{{ false }}">
+                  <div role="group" aria-label="Image upload" style="width:310px;height:232px;box-sizing:border-box;border:3px solid #12131A;border-radius:18px;background:#FFD2BD;box-shadow:5px 5px 0 #FF6A2B;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:10px">
+                    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                      <span style="flex:none;width:34px;height:34px;border-radius:50%;background:#fff;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v9M12 19v.5"/></svg></span>
+                      <div role="alert" style="min-width:0"><div class="disp" style="font-size:20px;line-height:1.05">Upload didn't finish</div></div>
+                    </div>
+                    <span style="font-size:14px;font-weight:600;line-height:1.35"><b>{{ upName }}</b> wasn't added to your question. Check your connection and try again.</span>
+                    <div style="display:flex;gap:8px"><button class="sb prim" onClick="{{ retryUpload }}" autoFocus="true" style="flex:1;height:44px;font-size:16px">Retry</button><button class="sb sec" onClick="{{ cancelUpload }}" style="flex:1;height:44px;font-size:15px">Cancel</button></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ prevShow }}">
+                  <div style="width:310px;height:232px;box-sizing:border-box;border:3px solid #12131A;border-radius:18px;background:#12131A;box-shadow:5px 5px 0 #2B4BFF;overflow:hidden;display:flex;align-items:center;justify-content:center">
+                    <img src="{{ imgUrl }}" alt="{{ alt }}" style="max-width:100%;max-height:100%;display:block">
+                  </div>
+                  <sc-if value="{{ isUpload }}" hint-placeholder-val="{{ false }}"><span class="mono" style="font-size:11px;letter-spacing:.5px;color:#3B4152;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">YOUR UPLOAD · {{ upImgName }} · {{ upImgSize }}</span></sc-if>
+                  <div style="display:flex;gap:8px">
+                    <button class="sb sec" onClick="{{ openPicker }}" style="flex:1;height:40px;font-size:14px">Replace image</button>
+                    <button class="sb sec" onClick="{{ removeImage }}" style="flex:1;height:40px;font-size:14px">Remove</button>
+                  </div>
+                  <label style="display:flex;flex-direction:column;gap:3px">
+                    <span class="mono" style="font-size:11px;letter-spacing:1px;color:#3B4152">IMAGE DESCRIPTION (SCREEN READERS)</span>
+                    <input value="{{ alt }}" onChange="{{ setAlt }}" placeholder="{{ altPh }}" style="height:38px;border:2.5px solid #12131A;border-radius:10px;background:#fff;padding:0 10px;font-weight:600;font-size:13px;color:#12131A">
+                    <span style="font-size:12px;font-weight:600;color:#3B4152;line-height:1.3">Describe what is visible without giving the answer away.</span>
+                  </label>
+                </sc-if>
+              </div>
+
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+                <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px">
+                  <sc-for list="{{ edAns }}" as="o" hint-placeholder-count="4">
+                    <div style="border:2.5px solid #12131A;border-radius:16px;background:{{ o.bg }};display:flex;align-items:center;gap:8px;padding:8px">
+                      <div style="flex:none;width:36px;height:36px;border-radius:10px;border:2.5px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                        <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                        <sc-if value="{{ o.isDia }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                        <sc-if value="{{ o.isCir }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                        <sc-if value="{{ o.isSqu }}"><svg width="18" height="18" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                      </div>
+                      <input value="{{ o.label }}" onChange="{{ o.edit }}" aria-label="Answer {{ o.n }}" style="flex:1;min-width:0;background:transparent;border:0;font-weight:700;font-size:16px;color:#12131A;padding:6px 0">
+                      <button onClick="{{ o.mark }}" aria-label="Mark answer {{ o.n }} as correct" aria-pressed="{{ o.isCorrect }}" style="flex:none;height:32px;padding:0 10px;border-radius:999px;border:2.5px solid #12131A;background:{{ o.tbg }};color:#12131A;font-weight:700;font-size:12px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>{{ o.tlabel }}</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:18px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <span class="mono" style="font-size:11px;letter-spacing:1px;color:#3B4152">TIME</span>
+                    <div style="display:flex;border:2.5px solid #12131A;border-radius:12px;overflow:hidden;background:#fff">
+                      <sc-for list="{{ edTimes }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" style="height:36px;min-width:42px;padding:0 6px;border:0;border-right:2px solid #12131A;background:{{ t.bg }};color:{{ t.ink }};font-family:'DM Mono',monospace;font-size:13px">{{ t.label }}</button></sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <span class="mono" style="font-size:11px;letter-spacing:1px;color:#3B4152">POINTS</span>
+                    <div style="display:flex;border:2.5px solid #12131A;border-radius:12px;overflow:hidden;background:#fff">
+                      <sc-for list="{{ edPts }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.pick }}" aria-pressed="{{ p.on }}" style="height:36px;padding:0 12px;border:0;border-right:2px solid #12131A;background:{{ p.bg }};color:{{ p.ink }};font-weight:700;font-size:13px">{{ p.label }}</button></sc-for>
+                    </div>
+                  </div>
+                </div>
+                <label style="display:flex;flex-direction:column;gap:5px">
+                  <span class="mono" style="font-size:11px;letter-spacing:1px;color:#3B4152">REVEAL FACT (OPTIONAL, SHOWN WITH THE ANSWER)</span>
+                  <input value="{{ fact }}" onChange="{{ setFact }}" style="height:42px;border:2.5px solid #12131A;border-radius:12px;background:#fff;padding:0 12px;font-weight:600;font-size:15px;color:#12131A">
+                </label>
+              </div>
+            </div>
+
+            <div style="margin-top:auto;display:flex;align-items:center;gap:10px;background:#fff;border:2.5px solid #12131A;border-radius:14px;padding:10px 14px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B4BFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+              <span style="font-size:14px;font-weight:600;line-height:1.35">Players always see the whole image. Nothing is cropped, and the phone preview on the right updates as you edit.</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- Host: preparing -->
+        <sc-if value="{{ hPrep }}">
+          <div style="height:100%;box-sizing:border-box;padding:30px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+            <div style="display:flex;gap:8px"><span class="mono" style="font-size:14px;background:#2B4BFF;color:#fff;border:2.5px solid #12131A;border-radius:10px;padding:4px 10px">Q3 / 10</span><span class="mono" style="font-size:12px;letter-spacing:1px;background:#8FD3FF;border:2px solid #12131A;border-radius:7px;padding:4px 8px">IMAGE QUESTION</span></div>
+            <span class="disp" style="font-size:46px;line-height:1.05;letter-spacing:-1px">{{ prepTitle }}</span>
+            <span style="font-size:18px;font-weight:600;color:#3B4152;max-width:560px;line-height:1.4">{{ prepBody }}</span>
+
+            <div style="width:100%;max-width:640px;border:3px solid #12131A;border-radius:24px;background:#fff;box-shadow:5px 5px 0 #12131A;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span class="mono" style="font-size:52px;line-height:1">{{ readyCount }}<span style="font-size:24px;color:#3B4152"> of 20 ready</span></span>
+                <sc-if value="{{ pLoading }}" hint-placeholder-val="{{ true }}"><span class="spin" style="width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:4px solid #D7D3C8;border-top-color:#12131A" aria-hidden="true"></span></sc-if>
+                <sc-if value="{{ pReady }}"><span class="pop" style="width:34px;height:34px;border-radius:50%;background:#2EE6A6;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span></sc-if>
+              </div>
+              <div style="display:flex;gap:5px" role="img" aria-label="{{ readyCount }} of 20 players ready">
+                <sc-for list="{{ dots }}" as="d" hint-placeholder-count="20"><div style="flex:1;height:18px;border-radius:6px;border:2px solid #12131A;background:{{ d.bg }}"></div></sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ pCounting }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:6px"><span class="mono" style="font-size:13px;letter-spacing:2px;color:#3B4152">STARTING FOR EVERYONE IN</span><span class="disp pop" style="font-size:110px;line-height:1;color:#2B4BFF">{{ countLeft }}</span></div>
+            </sc-if>
+
+            <sc-if value="{{ pDelayed }}">
+              <div style="width:100%;max-width:820px;display:flex;flex-direction:column;gap:12px;margin-top:4px">
+                <div style="display:flex;align-items:center;gap:10px;background:#FFF3B8;border:2.5px solid #12131A;border-radius:14px;padding:10px 14px;text-align:left"><span style="font-weight:700;font-size:16px">{{ problemCount }} players are taking longer than usual to load the image.</span></div>
+                <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:6px"><button class="sb prim" onClick="{{ waitMore }}" style="height:54px;font-size:18px">Wait a few seconds</button><span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">Give slower connections a moment. We keep checking.</span></div>
+                  <div style="display:flex;flex-direction:column;gap:6px"><button class="sb sec" onClick="{{ startAnyway }}" style="height:54px;font-size:17px">Start anyway</button><span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">The timer starts for everyone. Slow players join as soon as their image appears.</span></div>
+                  <div style="display:flex;flex-direction:column;gap:6px"><button class="sb dash" onClick="{{ skipQ }}" style="height:54px;font-size:17px">Skip, no scoring</button><span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">Nobody scores and the game moves on.</span></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ pFailed }}">
+              <div style="width:100%;max-width:820px;display:flex;flex-direction:column;gap:12px;margin-top:4px">
+                <div style="display:flex;align-items:center;gap:10px;background:#FFD0EB;border:2.5px solid #12131A;border-radius:14px;padding:10px 14px;text-align:left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><span style="font-weight:700;font-size:16px">3 players can't load the image. They can retry on their phones.</span></div>
+                <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:6px"><button class="sb prim" onClick="{{ voidIt }}" style="height:54px;font-size:18px">Void question for everyone</button><span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">Nobody gains or loses points. The game continues with the next question.</span></div>
+                  <div style="display:flex;flex-direction:column;gap:6px"><button class="sb sec" onClick="{{ startAnyway }}" style="height:54px;font-size:17px">Start anyway</button><span style="font-size:13px;font-weight:600;color:#3B4152;line-height:1.35">Those 3 players will answer without the picture.</span></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ pLoading }}">
+              <span style="font-size:14px;font-weight:600;color:#3B4152;margin-top:4px">You don't have to wait for everyone. Options appear if loading takes long.</span>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- Host: question on the shared display -->
+        <sc-if value="{{ hActive }}">
+          <div style="height:100%;box-sizing:border-box;padding:18px 26px 22px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="mono" style="font-size:16px;background:#2B4BFF;color:#fff;border:2.5px solid #12131A;border-radius:12px;padding:4px 12px">Q3 / 10</span>
+              <span class="mono" style="font-size:12px;letter-spacing:1px;background:#FFD43B;border:2px solid #12131A;border-radius:7px;padding:3px 8px">1× POINTS</span>
+              <div style="flex:1"></div>
+              <span class="disp" style="font-size:26px">{{ answered }} <span style="font-size:18px;color:#3B4152;font-weight:600">of 20 answered</span></span>
+            </div>
+            <sc-if value="{{ hostProblem }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:12px;background:#FFD0EB;border:2.5px solid #12131A;border-radius:14px;padding:8px 8px 8px 14px">
+                <span style="flex:1;font-weight:700;font-size:15px">3 players can't see the image.</span>
+                <button class="sb prim" onClick="{{ voidIt }}" style="height:40px;padding:0 16px;font-size:15px">Void question for everyone</button>
+              </div>
+            </sc-if>
+            <div style="display:flex;gap:24px;align-items:stretch">
+              <div style="flex:none;width:452px;height:339px;box-sizing:border-box;border:4px solid #12131A;border-radius:22px;background:#12131A;box-shadow:8px 8px 0 #12131A;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="{{ imgUrl }}" alt="{{ alt }}" style="max-width:100%;max-height:100%;display:block"></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:12px">
+                <span class="disp" style="font-size:42px;line-height:1.04;letter-spacing:-1px">{{ prompt }}</span>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between"><span class="mono" style="font-size:12px;letter-spacing:2px;color:#3B4152">TIME LEFT</span><span class="mono" style="font-size:64px;line-height:1;color:#2B4BFF">{{ secs }}</span></div>
+                  <div style="height:22px;border:3px solid #12131A;border-radius:999px;background:#fff;overflow:hidden"><div style="width:{{ pct }}%;height:100%;background:#FFD43B;border-right:3px solid #12131A"></div></div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));grid-auto-rows:1fr;gap:14px">
+              <sc-for list="{{ hostAns }}" as="o" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:16px;border:3px solid #12131A;border-radius:20px;background:#fff;box-shadow:5px 5px 0 #12131A;padding:0 18px 0 12px;min-height:0">
+                  <div style="flex:none;width:58px;height:58px;border-radius:14px;border:3px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                    <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isDia }}"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                    <sc-if value="{{ o.isCir }}"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isSqu }}"><svg width="30" height="30" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                  </div>
+                  <span class="disp" style="font-size:34px;letter-spacing:-.5px">{{ o.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:flex-end"><button class="sb sec" onClick="{{ revealNow }}" style="height:40px;padding:0 16px;font-size:14px">Show answer now</button></div>
+          </div>
+        </sc-if>
+
+        <!-- Host: reveal -->
+        <sc-if value="{{ hReveal }}">
+          <div style="height:100%;box-sizing:border-box;padding:20px 26px 22px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="mono" style="font-size:16px;background:#2B4BFF;color:#fff;border:2.5px solid #12131A;border-radius:12px;padding:4px 12px">Q3 / 10</span>
+              <span class="mono" style="font-size:12px;letter-spacing:1px;background:#12131A;color:#fff;border-radius:7px;padding:4px 8px">TIME'S UP</span>
+            </div>
+            <div style="flex:1;display:flex;gap:22px;min-height:0">
+              <div style="flex:none;width:340px;display:flex;flex-direction:column;gap:14px">
+                <div style="width:340px;height:255px;box-sizing:border-box;border:4px solid #12131A;border-radius:20px;background:#12131A;box-shadow:6px 6px 0 #12131A;overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="{{ imgUrl }}" alt="{{ alt }}" style="max-width:100%;max-height:100%;display:block"></div>
+                <div style="display:flex;align-items:center;gap:10px;border:3px solid #12131A;border-radius:18px;background:#FFF3B8;padding:12px 14px;box-shadow:4px 4px 0 #12131A">
+                  <div style="flex:none;width:34px;height:34px;border-radius:50%;background:#FFD43B;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></div>
+                  <div style="display:flex;flex-direction:column"><span class="mono" style="font-size:11px;letter-spacing:1.5px;color:#3B4152">DID YOU KNOW</span><span style="font-weight:700;font-size:15px;line-height:1.3">{{ fact }}</span></div>
+                </div>
+                <div style="margin-top:auto;display:flex;flex-direction:column">
+                  <span class="disp" style="font-size:80px;line-height:.9;letter-spacing:-3px;color:#2B4BFF">{{ pctRight }}%</span>
+                  <span class="disp" style="font-size:24px">of the room got it</span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+                <span class="disp" style="font-size:30px;line-height:1.08">{{ prompt }}</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-height:0">
+                  <sc-for list="{{ revAns }}" as="r" hint-placeholder-count="4">
+                    <div style="position:relative;flex:1;border:{{ r.bw }}px solid #12131A;border-radius:20px;background:#fff;box-shadow:{{ r.shadow }};overflow:hidden;display:flex;align-items:center;min-height:0">
+                      <div class="grow" style="position:absolute;left:0;top:0;bottom:0;width:{{ r.pct }}%;background:{{ r.fill }}"></div>
+                      <div style="position:relative;flex:1;display:flex;align-items:center;gap:16px;padding:0 20px 0 12px">
+                        <div style="flex:none;width:54px;height:54px;border-radius:13px;border:3px solid #12131A;background:{{ r.color }};display:flex;align-items:center;justify-content:center">
+                          <sc-if value="{{ r.isTri }}" hint-placeholder-val="{{ true }}"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                          <sc-if value="{{ r.isDia }}"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                          <sc-if value="{{ r.isCir }}"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                          <sc-if value="{{ r.isSqu }}"><svg width="28" height="28" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                        </div>
+                        <span class="disp" style="flex:1;font-size:32px">{{ r.label }}</span>
+                        <sc-if value="{{ r.right }}" hint-placeholder-val="{{ true }}"><span class="mono" style="display:flex;align-items:center;gap:6px;background:#12131A;color:#2EE6A6;border-radius:999px;padding:6px 12px;font-size:13px;letter-spacing:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2EE6A6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>RIGHT</span></sc-if>
+                        <span class="mono" style="font-size:28px;min-width:44px;text-align:right">{{ r.count }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end"><button class="sb prim" onClick="{{ nextQ }}" style="height:56px;padding:0 28px;font-size:22px;display:flex;align-items:center;gap:10px">Next question<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button></div>
+          </div>
+        </sc-if>
+
+        <!-- Host: voided -->
+        <sc-if value="{{ hVoid }}">
+          <div style="height:100%;box-sizing:border-box;padding:30px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;background:repeating-linear-gradient(135deg,#E7E4DA 0 14px,#F4F2EC 14px 28px)">
+            <div class="pop" style="border:4px dashed #12131A;border-radius:28px;background:#F4F2EC;padding:30px 46px;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:700px">
+              <div style="width:78px;height:78px;border-radius:50%;border:5px solid #12131A;display:flex;align-items:center;justify-content:center;background:#fff"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></div>
+              <span class="mono" style="font-size:14px;letter-spacing:4px;border:2.5px solid #12131A;border-radius:8px;padding:2px 12px;transform:rotate(-3deg)">VOID</span>
+              <span class="disp" style="font-size:48px;line-height:1.02;letter-spacing:-1px">Question voided</span>
+              <span style="font-size:19px;font-weight:600;line-height:1.4;color:#3B4152">{{ voidBody }}</span>
+              <div style="display:flex;gap:10px;margin-top:4px"><span class="mono" style="font-size:13px;background:#fff;border:2.5px solid #12131A;border-radius:10px;padding:5px 12px">No points awarded</span><span class="mono" style="font-size:13px;background:#fff;border:2.5px solid #12131A;border-radius:10px;padding:5px 12px">Scores unchanged</span><span class="mono" style="font-size:13px;background:#fff;border:2.5px solid #12131A;border-radius:10px;padding:5px 12px">Streaks kept</span></div>
+            </div>
+            <button class="sb prim" onClick="{{ nextQ }}" style="height:58px;padding:0 30px;font-size:22px;display:flex;align-items:center;gap:10px">Continue to next question<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+          </div>
+        </sc-if>
+
+        <!-- Host: next question (text only, unchanged layout) -->
+        <sc-if value="{{ hNext }}">
+          <div style="height:100%;box-sizing:border-box;padding:22px 26px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="mono" style="font-size:16px;background:#2B4BFF;color:#fff;border:2.5px solid #12131A;border-radius:12px;padding:4px 12px">Q4 / 10</span>
+              <span class="mono" style="font-size:12px;letter-spacing:1px;background:#fff;border:2px solid #12131A;border-radius:7px;padding:3px 8px">TEXT-ONLY QUESTION · LAYOUT UNCHANGED</span>
+              <div style="flex:1"></div>
+              <span class="disp" style="font-size:26px">0 <span style="font-size:18px;color:#3B4152;font-weight:600">of 20 answered</span></span>
+            </div>
+            <div style="flex:none;border:3px solid #12131A;border-radius:24px;background:#2B4BFF;color:#fff;padding:34px 36px;text-align:center"><span class="disp" style="font-size:52px;line-height:1.05;letter-spacing:-1px">What is the capital of Australia?</span></div>
+            <div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));grid-auto-rows:1fr;gap:16px">
+              <sc-for list="{{ nextAns }}" as="o" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:18px;border:3px solid #12131A;border-radius:22px;background:#fff;box-shadow:6px 6px 0 #12131A;padding:0 22px 0 14px;min-height:0">
+                  <div style="flex:none;width:68px;height:68px;border-radius:16px;border:3px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                    <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isDia }}"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                    <sc-if value="{{ o.isCir }}"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isSqu }}"><svg width="34" height="34" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                  </div>
+                  <span class="disp" style="font-size:38px">{{ o.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- Image picker -->
+        <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,19,26,.6);display:flex;align-items:center;justify-content:center;padding:20px">
+            <div role="dialog" aria-modal="true" aria-labelledby="picker-title" onKeyDown="{{ pickerKey }}" style="width:760px;max-height:100%;box-sizing:border-box;border:3px solid #12131A;border-radius:26px;background:#fff;box-shadow:8px 8px 0 #12131A;padding:20px 22px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div style="display:flex;flex-direction:column;gap:2px"><span id="picker-title" class="disp" style="font-size:30px;line-height:1.05">Choose an image</span><span style="font-size:14px;font-weight:600;color:#3B4152">Pick from our library, or upload your own picture. Library names are for you only; players never see them.</span></div>
+                <button onClick="{{ closePicker }}" autoFocus="true" aria-label="Close image picker" style="flex:none;width:46px;height:46px;border-radius:12px;border:2.5px solid #12131A;background:#fff;padding:0;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+              </div>
+              <div role="tablist" aria-label="Image source" style="display:flex;gap:0;border:2.5px solid #12131A;border-radius:14px;overflow:hidden;align-self:flex-start">
+                <button role="tab" id="tab-lib" aria-selected="{{ libTab }}" onClick="{{ tabLib }}" style="height:42px;padding:0 20px;border:0;border-right:2.5px solid #12131A;background:{{ libTabBg }};color:{{ libTabInk }};font-weight:700;font-size:15px">Library</button>
+                <button role="tab" id="tab-up" aria-selected="{{ upTab }}" onClick="{{ tabUp }}" style="height:42px;padding:0 20px;border:0;background:{{ upTabBg }};color:{{ upTabInk }};font-weight:700;font-size:15px">Upload your own</button>
+              </div>
+              <sc-if value="{{ libTab }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:6px" role="group" aria-label="Image categories">
+                <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.pick }}" aria-pressed="{{ c.on }}" style="height:36px;padding:0 14px;border-radius:999px;border:2.5px solid #12131A;background:{{ c.bg }};color:#12131A;font-weight:700;font-size:14px">{{ c.label }}</button></sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px;overflow:hidden;padding:4px">
+                <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="8">
+                  <button onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" aria-label="{{ t.aria }}" style="position:relative;padding:0;border:3px solid #12131A;border-radius:16px;background:#fff;overflow:hidden;text-align:left;box-shadow:{{ t.shadow }}">
+                    <div style="height:104px;background:#12131A;display:flex;align-items:center;justify-content:center"><img src="{{ t.url }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-weight:700;font-size:14px"><span>{{ t.name }}</span><span class="mono" style="font-size:11px;color:#3B4152">{{ t.cat }}</span></div>
+                    <sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span class="pop" style="position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:#2B4BFF;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <span style="font-size:14px;font-weight:600;color:#3B4152">{{ pendingNote }}</span>
+                <div style="display:flex;gap:10px"><button class="sb sec" onClick="{{ closePicker }}" style="height:46px;padding:0 20px;font-size:16px">Cancel</button><button class="sb prim" onClick="{{ useImage }}" disabled="{{ cannotUse }}" style="height:46px;padding:0 22px;font-size:17px">Use this image</button></div>
+              </div>
+              </sc-if>
+              <sc-if value="{{ upTab }}" hint-placeholder-val="{{ false }}">
+                <div role="tabpanel" aria-labelledby="tab-up" style="display:flex;flex-direction:column;gap:12px">
+                  <sc-if value="{{ upErr }}" hint-placeholder-val="{{ false }}">
+                    <div role="alert" style="border:3px solid #12131A;border-radius:16px;background:#FFD2BD;padding:12px 14px;display:flex;gap:12px;align-items:flex-start">
+                      <span style="flex:none;width:30px;height:30px;border-radius:50%;background:#fff;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v9M12 19v.5"/></svg></span>
+                      <div style="display:flex;flex-direction:column;gap:2px"><span class="disp" style="font-size:20px;line-height:1.1">{{ upErrTitle }}</span><span style="font-size:14px;font-weight:600;line-height:1.35">{{ upErrBody }}</span></div>
+                    </div>
+                  </sc-if>
+                  <div style="border:3px dashed #12131A;border-radius:18px;background:#F4F2EC;padding:22px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+                    <label class="fl sb prim" style="position:relative;height:50px;padding:0 26px;display:flex;align-items:center;font-size:18px;cursor:pointer">{{ chooseLabel }}<input class="vh" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange="{{ onFile }}"></label>
+                    <span style="font-size:14px;font-weight:700">JPEG, PNG or WebP · up to 5 MB</span>
+                  </div>
+                  <div style="border:2.5px solid #12131A;border-radius:14px;background:#FFF3B8;padding:10px 14px;display:flex;gap:10px;align-items:center">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.5v.5"/></svg>
+                    <span style="font-size:14px;font-weight:700;line-height:1.35">Only upload images you have permission to share. Everyone playing will see this picture on their phone.</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span class="mono" style="font-size:11px;letter-spacing:1px;color:#3B4152">PROTOTYPE · TRY A SAMPLE FILE</span>
+                    <sc-for list="{{ demoFiles }}" as="d" hint-placeholder-count="3"><button onClick="{{ d.pick }}" style="height:32px;padding:0 12px;border-radius:999px;border:2.5px solid #12131A;background:#fff;color:#12131A;font-weight:700;font-size:13px">{{ d.label }}</button></sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                    <span style="font-size:14px;font-weight:600;color:#3B4152">Your picture is checked after it uploads. This takes a few seconds.</span>
+                    <button class="sb sec" onClick="{{ closePicker }}" style="height:46px;padding:0 20px;font-size:16px">Cancel</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- PHONE SIDE -->
+    <div style="flex:none;width:470px;box-sizing:border-box;border-left:3px solid #12131A;background:#E7E4DA;padding:18px 0 18px;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <span class="mono" style="font-size:12px;letter-spacing:2px;color:#3B4152">{{ phoneLabel }}</span>
+      <div style="position:relative;flex:none;width:{{ wide }}px;height:{{ phoneH }}px;box-sizing:content-box;border:4px solid #12131A;border-radius:34px;background:#F4F2EC;box-shadow:6px 6px 0 #12131A;overflow:hidden">
+
+        <!-- Phone: question (also builder preview) -->
+        <sc-if value="{{ pAct }}" hint-placeholder-val="{{ true }}">
+          <div style="height:100%;display:flex;flex-direction:column;background:#F4F2EC">
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px">
+              <span class="mono" style="font-size:13px;background:#fff;border:2px solid #12131A;border-radius:9px;padding:3px 8px">Q3 / 10</span>
+              <span class="mono" style="font-size:12px;background:#FFD43B;border:2px solid #12131A;border-radius:9px;padding:3px 8px">{{ ptsLabel }}</span>
+              <span class="mono" style="font-size:18px">2,140</span>
+            </div>
+            <div style="flex:none;display:flex;align-items:center;gap:10px;padding:0 14px 8px">
+              <div style="flex:1;height:14px;border:2.5px solid #12131A;border-radius:999px;background:#fff;overflow:hidden"><div style="width:{{ pct }}%;height:100%;background:#FF6A2B;border-right:2.5px solid #12131A"></div></div>
+              <span class="mono" style="font-size:18px;min-width:26px;text-align:right">{{ secs }}</span>
+            </div>
+            <div class="disp" style="flex:none;font-size:{{ pPromptSize }}px;line-height:1.1;letter-spacing:-.4px;padding:4px 16px 8px">{{ prompt }}</div>
+
+            <sc-if value="{{ phHas }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:none;padding:0 14px 10px">
+                <sc-if value="{{ imgLoaded }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ zoomIn }}" aria-label="Enlarge image: {{ altP }}" style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:{{ imgH }}px;padding:0;border:3px solid #12131A;border-radius:16px;background:#12131A;overflow:hidden;box-shadow:3px 3px 0 #12131A">
+                    <img src="{{ imgUrl }}" alt="" style="max-width:100%;max-height:100%;display:block">
+                    <span style="position:absolute;right:8px;bottom:8px;width:36px;height:36px;border-radius:10px;background:#fff;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="2.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M10.5 8v5M8 10.5h5"/></svg></span>
+                  </button>
+                </sc-if>
+                <sc-if value="{{ imgLoading }}">
+                  <div class="pulse" style="width:100%;height:{{ imgH }}px;box-sizing:border-box;border:3px solid #12131A;border-radius:16px;background:#D7D3C8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px"><span class="spin" style="width:28px;height:28px;box-sizing:border-box;border-radius:50%;border:4px solid #9A978D;border-top-color:#12131A" aria-hidden="true"></span><span style="font-weight:700;font-size:14px">Loading the picture…</span></div>
+                </sc-if>
+                <sc-if value="{{ imgRetrying }}">
+                  <div style="width:100%;height:{{ imgH }}px;box-sizing:border-box;border:3px solid #12131A;border-radius:16px;background:#D7D3C8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px"><span class="spin" style="width:28px;height:28px;box-sizing:border-box;border-radius:50%;border:4px solid #9A978D;border-top-color:#12131A" aria-hidden="true"></span><span style="font-weight:700;font-size:14px">Trying again…</span></div>
+                </sc-if>
+                <sc-if value="{{ imgFailed }}">
+                  <div role="alert" style="width:100%;height:{{ imgH }}px;box-sizing:border-box;border:3px dashed #12131A;border-radius:16px;background:#FFD0EB;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 14px;text-align:center"><span style="font-weight:700;font-size:15px;line-height:1.25">The picture didn't load. You can still answer, but the clock keeps running.</span><button class="sb sec" onClick="{{ retry }}" style="height:42px;padding:0 18px;font-size:15px">Retry</button></div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:0 14px">
+              <sc-for list="{{ phoneAns }}" as="o" hint-placeholder-count="4">
+                <button class="row" onClick="{{ o.pick }}" disabled="{{ o.disabled }}" aria-pressed="{{ o.chosen }}" style="flex:1;min-height:0;max-height:{{ rowMax }}px;display:flex;align-items:center;gap:12px;padding:0 12px 0 8px;border:3px solid #12131A;border-radius:16px;background:{{ o.bg }};color:{{ o.ink }};box-shadow:{{ o.shadow }};opacity:{{ o.opacity }};text-align:left">
+                  <div style="flex:none;width:42px;height:42px;border-radius:11px;border:2.5px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                    <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isDia }}"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                    <sc-if value="{{ o.isCir }}"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isSqu }}"><svg width="22" height="22" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                  </div>
+                  <span class="disp" style="flex:1;font-size:{{ pAnsSize }}px">{{ o.label }}</span>
+                  <sc-if value="{{ o.chosen }}" hint-placeholder-val="{{ false }}"><span class="pop" style="flex:none;width:30px;height:30px;border-radius:50%;background:#2EE6A6;border:2.5px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+            <div style="flex:none;height:54px;display:flex;align-items:center;justify-content:center;padding:0 14px" aria-live="polite">
+              <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:{{ stripInk }};background:{{ stripBg }};border-radius:999px;padding:7px 16px;text-align:center">{{ strip }}</span>
+            </div>
+
+            <sc-if value="{{ zoom }}" hint-placeholder-val="{{ false }}">
+              <div role="dialog" aria-modal="true" aria-label="Enlarged image" onKeyDown="{{ zoomKey }}" style="position:absolute;left:0;top:0;right:0;bottom:0;background:#12131A;display:flex;flex-direction:column;color:#fff">
+                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 14px">
+                  <span class="mono" style="font-size:22px;color:#FFD43B;min-width:34px">{{ secs }}</span>
+                  <div style="flex:1;height:14px;border:2.5px solid #fff;border-radius:999px;overflow:hidden"><div style="width:{{ pct }}%;height:100%;background:#FF6A2B"></div></div>
+                  <button onClick="{{ zoomOut }}" autoFocus="true" aria-label="Close enlarged image" style="flex:none;height:48px;padding:0 14px 0 12px;border-radius:12px;border:2.5px solid #fff;background:#fff;color:#12131A;font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>Close</button>
+                </div>
+                <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 8px"><img src="{{ imgUrl }}" alt="{{ altP }}" style="max-width:100%;max-height:100%;display:block"></div>
+                <div style="flex:none;padding:12px 14px 18px;text-align:center;font-weight:700;font-size:14px;color:#D7DAE6">The clock is still running. Close to answer.</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- Phone: preparing -->
+        <sc-if value="{{ pPrep }}">
+          <div style="height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 24px;text-align:center;background:#F4F2EC">
+            <sc-if value="{{ qLoading }}" hint-placeholder-val="{{ true }}">
+              <span class="spin" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:5px solid #D7D3C8;border-top-color:#12131A" aria-hidden="true"></span>
+              <div role="status" style="display:flex;flex-direction:column;gap:6px"><span class="disp" style="font-size:30px;line-height:1.08">Getting your question ready…</span><span style="font-weight:600;font-size:16px;color:#3B4152">Hang tight. We'll start everyone together.</span></div>
+            </sc-if>
+            <sc-if value="{{ qRetrying }}">
+              <span class="spin" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:5px solid #D7D3C8;border-top-color:#12131A" aria-hidden="true"></span>
+              <div role="status" style="display:flex;flex-direction:column;gap:6px"><span class="disp" style="font-size:30px;line-height:1.08">Trying again…</span></div>
+            </sc-if>
+            <sc-if value="{{ qFailed }}">
+              <div role="alert" style="width:100%;box-sizing:border-box;border:3px solid #12131A;border-radius:22px;background:#FFD0EB;box-shadow:5px 5px 0 #12131A;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:12px">
+                <div style="width:54px;height:54px;border-radius:50%;background:#fff;border:3px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 6v8M12 18v.5"/></svg></div>
+                <span class="disp" style="font-size:26px;line-height:1.08">We couldn't load the picture</span>
+                <span style="font-weight:600;font-size:15px;line-height:1.4">Check your connection and try again. Your host can see that some players are having trouble.</span>
+                <button class="sb prim" onClick="{{ retry }}" style="height:52px;padding:0 30px;font-size:19px">Retry</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ qReady }}">
+              <div class="pop" style="width:64px;height:64px;border-radius:50%;background:#2EE6A6;border:3px solid #12131A;display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
+              <div role="status" style="display:flex;flex-direction:column;gap:6px"><span class="disp" style="font-size:30px;line-height:1.08">You're ready!</span><span style="font-weight:600;font-size:16px;color:#3B4152">Waiting for the host to start.</span></div>
+            </sc-if>
+            <sc-if value="{{ qCounting }}">
+              <span class="mono" style="font-size:13px;letter-spacing:2px;color:#3B4152">GET READY</span>
+              <span class="disp pop" style="font-size:120px;line-height:1;color:#2B4BFF">{{ countLeft }}</span>
+              <span style="font-weight:600;font-size:15px;color:#3B4152">{{ countNote }}</span>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- Phone: reveal -->
+        <sc-if value="{{ pReveal }}">
+          <div style="height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 16px 16px;text-align:center;background:{{ rvBg }}">
+            <div class="pop" style="width:64px;height:64px;flex:none;border-radius:50%;background:#12131A;display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ rvRight }}" hint-placeholder-val="{{ true }}"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2EE6A6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></sc-if>
+              <sc-if value="{{ rvWrong }}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF9AD5" stroke-width="4" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></sc-if>
+              <sc-if value="{{ rvNone }}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if>
+            </div>
+            <span class="disp" style="font-size:38px;line-height:1;letter-spacing:-1px">{{ rvTitle }}</span>
+            <span class="disp" style="font-size:44px;line-height:1;letter-spacing:-1px">{{ rvPoints }}</span>
+            <div style="width:100%;box-sizing:border-box;height:{{ rvImgH }}px;border:3px solid #12131A;border-radius:16px;background:#12131A;overflow:hidden;display:flex;align-items:center;justify-content:center;flex:none"><img src="{{ imgUrl }}" alt="{{ altP }}" style="max-width:100%;max-height:100%;display:block"></div>
+            <div style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;border:3px solid #12131A;border-radius:14px;background:#fff;padding:8px 10px;text-align:left;flex:none">
+              <div style="flex:none;width:36px;height:36px;border-radius:10px;border:2.5px solid #12131A;background:{{ rightColor }};display:flex;align-items:center;justify-content:center">
+                <sc-if value="{{ rTri }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                <sc-if value="{{ rDia }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                <sc-if value="{{ rCir }}"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                <sc-if value="{{ rSqu }}"><svg width="18" height="18" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+              </div>
+              <div style="display:flex;flex-direction:column"><span class="mono" style="font-size:10px;letter-spacing:1.5px;color:#3B4152">THE ANSWER</span><span class="disp" style="font-size:22px;line-height:1.05">{{ rightLabel }}</span></div>
+            </div>
+            <div style="width:100%;box-sizing:border-box;border:3px solid #12131A;border-radius:14px;background:#FFF3B8;padding:8px 12px;text-align:left;flex:none"><span class="mono" style="font-size:10px;letter-spacing:1.5px;color:#3B4152">DID YOU KNOW</span><div style="font-weight:700;font-size:14px;line-height:1.3">{{ fact }}</div></div>
+            <div style="margin-top:auto;display:flex;gap:8px;width:100%">
+              <div style="flex:1;border:3px solid #12131A;border-radius:14px;background:#12131A;color:#fff;padding:6px 8px"><div class="mono" style="font-size:10px;letter-spacing:1.5px;color:#B9BCCB">TOTAL</div><div class="mono" style="font-size:22px">{{ rvTotal }}</div></div>
+              <div style="flex:1;border:3px solid #12131A;border-radius:14px;background:#fff;padding:6px 8px"><div class="mono" style="font-size:10px;letter-spacing:1.5px;color:#3B4152">NEXT UP</div><div class="mono" style="font-size:16px;line-height:1.5">Question 4</div></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- Phone: voided -->
+        <sc-if value="{{ pVoid }}">
+          <div style="height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 20px;text-align:center;background:repeating-linear-gradient(135deg,#E7E4DA 0 12px,#F4F2EC 12px 24px)">
+            <div class="pop" style="width:100%;box-sizing:border-box;border:4px dashed #12131A;border-radius:24px;background:#F4F2EC;padding:24px 18px;display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:62px;height:62px;border-radius:50%;border:4px solid #12131A;background:#fff;display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12131A" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></div>
+              <span class="mono" style="font-size:12px;letter-spacing:4px;border:2.5px solid #12131A;border-radius:7px;padding:1px 10px;transform:rotate(-3deg)">VOID</span>
+              <span class="disp" style="font-size:32px;line-height:1.05">Question voided</span>
+              <span style="font-weight:600;font-size:15px;line-height:1.4;color:#3B4152">{{ phoneVoidBody }}</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><span class="mono" style="font-size:12px;background:#fff;border:2px solid #12131A;border-radius:9px;padding:3px 9px">Score still 2,140</span><span class="mono" style="font-size:12px;background:#fff;border:2px solid #12131A;border-radius:9px;padding:3px 9px">Streak kept</span></div>
+            </div>
+            <span style="font-weight:700;font-size:15px;color:#3B4152">Next question coming up…</span>
+          </div>
+        </sc-if>
+
+        <!-- Phone: next (text only) -->
+        <sc-if value="{{ pNext }}">
+          <div style="height:100%;display:flex;flex-direction:column;background:#F4F2EC">
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px"><span class="mono" style="font-size:13px;background:#fff;border:2px solid #12131A;border-radius:9px;padding:3px 8px">Q4 / 10</span><span class="mono" style="font-size:12px;background:#FFD43B;border:2px solid #12131A;border-radius:9px;padding:3px 8px">1× POINTS</span><span class="mono" style="font-size:18px">{{ rvTotal }}</span></div>
+            <div style="flex:none;padding:0 14px 8px"><div style="height:14px;border:2.5px solid #12131A;border-radius:999px;background:#fff;overflow:hidden"><div style="width:100%;height:100%;background:#FF6A2B;border-right:2.5px solid #12131A"></div></div></div>
+            <div class="disp" style="flex:none;font-size:30px;line-height:1.08;letter-spacing:-.5px;padding:8px 16px 14px">What is the capital of Australia?</div>
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:0 14px 18px">
+              <sc-for list="{{ nextPhoneAns }}" as="o" hint-placeholder-count="4">
+                <div style="flex:1;min-height:0;display:flex;align-items:center;gap:14px;padding:0 14px 0 10px;border:3px solid #12131A;border-radius:18px;background:#fff;box-shadow:4px 4px 0 #12131A">
+                  <div style="flex:none;width:50px;height:50px;border-radius:12px;border:2.5px solid #12131A;background:{{ o.color }};display:flex;align-items:center;justify-content:center">
+                    <sc-if value="{{ o.isTri }}" hint-placeholder-val="{{ true }}"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.6-8.5-11.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2.1.7-1.3 2.1-2.1 3.7-2.1 2.6 0 4.8 2.1 4.8 5.1C20.5 15.4 12 21 12 21z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isDia }}"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 1.5 19.5 12 12 22.5 4.5 12z" fill="#fff"/></svg></sc-if>
+                    <sc-if value="{{ o.isCir }}"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 2C9 6.5 3.5 9.5 3.5 14.2c0 2.6 2 4.4 4.4 4.4 1.5 0 2.6-.6 3.3-1.5-.1 1.9-.8 3.3-2.2 4.4V22h5.9v-.5c-1.4-1.1-2.1-2.5-2.2-4.4.7.9 1.8 1.5 3.3 1.5 2.4 0 4.4-1.8 4.4-4.4C20.5 9.5 15 6.5 12 2z" fill="#12131A"/></svg></sc-if>
+                    <sc-if value="{{ o.isSqu }}"><svg width="26" height="26" viewBox="0 0 24 24"><g fill="#12131A"><circle cx="12" cy="7.2" r="4.4"/><circle cx="6.6" cy="14.2" r="4.4"/><circle cx="17.4" cy="14.2" r="4.4"/><path d="M10.7 13h2.6l1.5 9H9.2z"/></g></svg></sc-if>
+                  </div>
+                  <span class="disp" style="font-size:26px">{{ o.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const now = Date.now();
+    this.state = {
+      step: 'build', t0: now, now,
+      image: null, pickerOpen: false, pending: null, cat: 'All',
+      prompt: 'Which planet is shown here?', answers: ['Jupiter', 'Saturn', 'Neptune', 'Uranus'], correct: 1, time: 20, pts: 1000,
+      fact: "Saturn's rings are made mostly of pieces of ice.", alt: '',
+      slow: false, fail: false, wide: 390, rm: false,
+      resumedAt: null, countStart: null, startAnyway: false, retryAt: null, recovered: false,
+      picked: -1, pickEl: 0, zoom: false, skip: 0, voidReason: '',
+      tab: 'lib', up: null, upImg: null, upErr: null, upFail: false
+    };
+  }
+  componentDidMount() { this.iv = setInterval(() => this.tick(), 100); }
+  componentWillUnmount() { clearInterval(this.iv); }
+
+  prep(S, now) {
+    const el = now - S.t0; let ready;
+    if (S.resumedAt != null) ready = Math.min(20, 15 + Math.floor((now - S.resumedAt) / 450));
+    else if (S.fail) ready = Math.min(17, 8 + Math.floor(el / 350));
+    else if (S.slow) ready = Math.min(15, 8 + Math.floor(el / 400));
+    else ready = Math.min(20, 8 + Math.floor(el / 250));
+    const allReady = ready >= 20; let phase = 'loading';
+    if (S.countStart) phase = 'counting';
+    else if (allReady) phase = 'ready';
+    else if (S.fail && el > 3200) phase = 'failed';
+    else if (S.slow && S.resumedAt == null && el > 4500) phase = 'delayed';
+    const countLeft = S.countStart ? Math.max(1, Math.ceil((3000 - (now - S.countStart)) / 1000)) : 3;
+    return { el, ready, allReady, phase, countLeft };
+  }
+  upPhase(S, now) {
+    const up = S.up;
+    if (!up) return { phase: 'none', pct: 0 };
+    if (up.status === 'ready') return { phase: 'ready', pct: 100 };
+    const el = now - up.t;
+    if (S.upFail && el >= 1500) return { phase: 'failed', pct: 62 };
+    if (el < 2400) return { phase: 'uploading', pct: Math.floor(el / 2400 * 100) };
+    if (el < 3600) return { phase: 'processing', pct: 100 };
+    return { phase: 'ready', pct: 100 };
+  }
+  pickFile(f) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    const okType = ['image/jpeg', 'image/png', 'image/webp'].includes(f.type) || (!f.type && ['jpg', 'jpeg', 'png', 'webp'].includes(ext));
+    if (!okType) return this.setState({ upErr: { kind: 'format', name: f.name, ext: f.name.includes('.') ? ext.toUpperCase() : '' } });
+    if (f.size > 5 * 1048576) return this.setState({ upErr: { kind: 'size', name: f.name, size: f.size } });
+    this.setState({ up: { name: f.name, size: f.size, url: f.url, t: Date.now(), status: 'sending' }, upErr: null, pickerOpen: false, tab: 'lib' });
+  }
+  youLoaded(S, now, p) {
+    if (S.fail) return S.recovered;
+    if (S.slow) return p.allReady || (S.countStart != null && now - S.countStart > 3500);
+    return now - S.t0 > 1600;
+  }
+  tick() {
+    const S = this.state, now = Date.now(), u = { now };
+    if (S.retryAt && now - S.retryAt >= 1200) { u.retryAt = null; if (!S.fail) u.recovered = true; }
+    if (S.step === 'prepare') {
+      const p = this.prep(S, now);
+      if (!S.countStart && p.allReady) u.countStart = now;
+      if (S.countStart && now - S.countStart >= 3000) { Object.assign(u, this.fresh('active', now)); u.countStart = S.countStart; u.startAnyway = S.startAnyway; }
+    }
+    if (S.step === 'active') {
+      const el = now - S.t0 + S.skip, total = S.time * 1000;
+      if (el >= total && S.zoom) u.zoom = false;
+      if (el >= total + 1800) Object.assign(u, this.fresh('reveal', now), { picked: S.picked, pickEl: S.pickEl });
+    }
+    if (S.up && S.up.status === 'sending' && this.upPhase(S, now).phase === 'ready') {
+      u.up = { ...S.up, status: 'ready' }; u.upImg = { name: S.up.name, size: S.up.size, url: S.up.url }; u.image = 'upload'; u.alt = '';
+    }
+    this.setState(u);
+  }
+  fresh(step, now) {
+    const S = this.state;
+    const b = { step, t0: now, picked: -1, pickEl: 0, zoom: false, skip: 0, resumedAt: null, countStart: null, startAnyway: false, retryAt: null, recovered: false, voidReason: '', pickerOpen: false };
+    if (['prepare', 'active', 'reveal'].includes(step) && !S.image) { b.image = 'saturn'; b.alt = 'A pale gold planet with wide, bright rings against dark space.'; }
+    if (step === 'active') { b.startAnyway = S.slow || S.fail; b.countStart = S.slow ? now : null; }
+    if (step === 'reveal') { b.picked = S.correct; b.pickEl = 4200; }
+    return b;
+  }
+  renderVals() {
+    const S = this.state, now = S.now;
+    const fmt = (n) => n.toLocaleString('en-US');
+    const IMGS = [
+      { id: 'saturn', name: 'Saturn', cat: 'Space', url: '/_blob/40ffdbb93382da9e2d38cddfed08248a', alt: 'A pale gold planet with wide, bright rings against dark space.' },
+      { id: 'earth', name: 'Earth', cat: 'Space', url: '/_blob/4c5852171769165b75317c9152bea37d', alt: 'A blue planet with green and tan land under swirling white clouds.' },
+      { id: 'moon', name: 'The Moon', cat: 'Space', url: '/_blob/6df35f50685c7e0442f2fc4dc0238d05', alt: 'A grey, cratered sphere against black space.' },
+      { id: 'volcano', name: 'Volcano', cat: 'Nature', url: '/_blob/984017c5f55a225f27fd7ae9717c06ee', alt: 'A dark volcano glowing orange at the top under a pink sky.' },
+      { id: 'whale', name: 'Whale', cat: 'Nature', url: '/_blob/f02fb05f180cea17f3d0a26313e4bb31', alt: 'A large blue-grey whale swimming through deep blue water.' },
+      { id: 'forest', name: 'Pine forest', cat: 'Nature', url: '/_blob/99fa09c0dd16eabe46d25526c3e45ce1', alt: 'Dark green pine trees on hills in soft morning mist.' },
+      { id: 'pyramids', name: 'Pyramids', cat: 'Places', url: '/_blob/a1d843170f25a581488cea4c67a6ab11', alt: 'Three sand-colored pyramids in a desert beneath a bright sun.' },
+      { id: 'lighthouse', name: 'Lighthouse', cat: 'Places', url: '/_blob/734fc4c8d92a1cfbd7365bdb28a4f7e3', alt: 'A red-and-white striped tower with a bright lamp at dusk.' }
+    ];
+    const img = S.image === 'upload' && S.upImg ? { id: 'upload', name: S.upImg.name, url: S.upImg.url, alt: '' } : (IMGS.find((x) => x.id === S.image) || null);
+    const sizeOf = (n) => (n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
+    const U = this.upPhase(S, now);
+    const upBusy = U.phase === 'uploading' || U.phase === 'processing', upFailed = U.phase === 'failed', upShow = upBusy || upFailed;
+    const playBlocked = upShow;
+    const hasImage = !!img;
+    const phHas = hasImage || (S.step === 'build' && upShow);
+    const palette = [['#FF6A2B', 'isTri'], ['#2B4BFF', 'isDia'], ['#FFD43B', 'isCir'], ['#2EE6A6', 'isSqu']];
+    const keyOf = (i) => { const o = { color: palette[i][0], isTri: false, isDia: false, isCir: false, isSqu: false }; o[palette[i][1]] = true; return o; };
+    const step = S.step;
+    const p = this.prep(S, now);
+    const total = S.time * 1000;
+    const aEl = step === 'active' ? now - S.t0 + S.skip : (step === 'build' ? 0 : total);
+    const left = Math.max(0, total - aEl), secs = Math.ceil(left / 1000), pct = Math.round(left / total * 100);
+    const timeUp = step === 'active' && aEl >= total;
+    const wide = S.wide, imgH = wide === 320 ? 150 : 190;
+    const upd = (patch) => this.setState(patch);
+
+    // --- builder
+    const edAns = S.answers.map((label, i) => ({ n: i + 1, label, ...keyOf(i), isCorrect: S.correct === i, bg: S.correct === i ? '#CFFAE8' : '#fff', tbg: S.correct === i ? '#2EE6A6' : '#fff', tlabel: S.correct === i ? 'Correct' : 'Mark',
+      edit: (e) => { const a = [...S.answers]; a[i] = e.target.value; upd({ answers: a }); }, mark: () => upd({ correct: i }) }));
+    const cats = ['All', 'Space', 'Nature', 'Places'].map((c) => ({ label: c, on: S.cat === c, bg: S.cat === c ? '#FFD43B' : '#fff', pick: () => upd({ cat: c }) }));
+    const thumbs = IMGS.filter((x) => S.cat === 'All' || x.cat === S.cat).map((x) => ({ name: x.name, cat: x.cat.toUpperCase(), url: x.url, on: S.pending === x.id, shadow: S.pending === x.id ? '4px 4px 0 #2B4BFF' : '3px 3px 0 #12131A', aria: x.name + ', ' + x.cat, pick: () => upd({ pending: x.id }) }));
+    const pend = IMGS.find((x) => x.id === S.pending);
+
+    // --- prepare
+    const dots = []; for (let i = 0; i < 20; i++) dots.push({ bg: i < p.ready ? '#2EE6A6' : '#fff' });
+    const ph = p.phase;
+    const prepTitle = ph === 'counting' ? 'Here we go!' : ph === 'ready' ? 'Everyone is ready' : ph === 'failed' ? 'Some players have a problem' : ph === 'delayed' ? 'Waiting on a few players' : 'Getting players ready';
+    const prepBody = ph === 'counting' ? 'The question and the timer start at the same moment for everyone.' : ph === 'ready' ? 'Starting in a moment.' : ph === 'failed' ? 'Loading the image failed for some phones.' : ph === 'delayed' ? "Slow connections are still loading the image. You don't need to wait for them." : 'Players are loading the question image. The picture stays hidden until you start.';
+
+    // --- player prep phase
+    const loadedYou = this.youLoaded(S, now, p);
+    let qp = 'loading';
+    if (S.countStart) qp = 'counting';
+    else if (S.retryAt && now - S.retryAt < 1200) qp = 'retrying';
+    else if (S.fail && !S.recovered && p.el > 2200) qp = 'failed';
+    else if (loadedYou) qp = 'ready';
+    const countNote = (S.slow || S.fail) && !loadedYou ? 'Your picture is still loading…' : 'Starting together with everyone';
+
+    // --- active
+    const base = Math.min(19, Math.floor(aEl / 700));
+    const answered = step === 'active' ? Math.min(20, (timeUp ? 19 : base) + (S.picked >= 0 ? 1 : 0)) : 0;
+    let imgState = 'loaded';
+    if (step === 'build' && upShow) imgState = 'loading';
+    else if (hasImage && step !== 'build') {
+      if (S.retryAt && now - S.retryAt < 1200) imgState = 'retrying';
+      else if (S.fail && !S.recovered) imgState = 'failed';
+      else if (S.slow && S.startAnyway && S.countStart && now < S.countStart + 3500) imgState = 'loading';
+    }
+    const locked = S.picked >= 0 || timeUp;
+    const phoneAns = S.answers.map((label, i) => {
+      const chosen = S.picked === i, k = keyOf(i);
+      return { label, ...k, chosen, disabled: step === 'build' || locked,
+        bg: chosen ? '#2B4BFF' : '#fff', ink: chosen ? '#fff' : '#12131A', opacity: locked && !chosen ? 0.45 : 1,
+        shadow: locked && !chosen ? 'none' : '4px 4px 0 #12131A',
+        pick: () => { if (this.state.step !== 'active' || this.state.picked >= 0) return; const e = Date.now() - this.state.t0 + this.state.skip; if (e >= total) return; this.setState({ picked: i, pickEl: e }); } };
+    });
+    const strip = step === 'build' ? 'Preview: this is what players see' : timeUp ? "Time's up!" : S.picked >= 0 ? 'Locked in · waiting for ' + (20 - answered) + ' more' : 'Tap fast. Speed earns points.';
+    const stripBg = timeUp ? '#12131A' : S.picked >= 0 ? '#12131A' : 'transparent';
+    const stripInk = timeUp || S.picked >= 0 ? '#fff' : '#3B4152';
+
+    // --- reveal
+    const right = S.correct;
+    const outcome = S.picked < 0 ? 'none' : S.picked === right ? 'right' : 'wrong';
+    const frac = Math.max(0, 1 - S.pickEl / total);
+    const earned = outcome === 'right' ? Math.round(S.pts * (0.5 + 0.5 * frac)) : 0;
+    const others = [4, 3, 2]; let oi = 0;
+    const counts = S.answers.map((_, i) => (i === right ? 11 : others[oi++]));
+    const fills = ['#FFD2BD', '#C9D2FF', '#FFF3B8', '#BFF5E0'];
+    const revAns = S.answers.map((label, i) => ({ label, count: counts[i], pct: Math.round(counts[i] / 20 * 100), ...keyOf(i), right: i === right, fill: i === right ? '#2EE6A6' : fills[i], bw: i === right ? 4 : 3, shadow: i === right ? '7px 7px 0 #12131A' : '4px 4px 0 #12131A' }));
+    const rk = keyOf(right);
+    const rvTotal = fmt(2140 + (S.step === 'reveal' || S.step === 'next' ? earned : 0));
+
+    const voidBody = S.voidReason === 'skipped' ? 'The host skipped this question. Nobody scores and every score stays as it was.' : "Some players couldn't see the image, so the host voided this question. Nobody gains or loses points.";
+    const phoneVoidBody = S.voidReason === 'skipped' ? 'The host skipped this one. No points for anyone.' : "Some players couldn't see the picture, so the host voided this one. No points for anyone.";
+
+    const nextAnsLabels = ['Sydney', 'Melbourne', 'Canberra', 'Perth'];
+    const nextAns = nextAnsLabels.map((label, i) => ({ label, ...keyOf(i) }));
+
+    const stepDefs = [['build', 'Build'], ['prepare', 'Prepare'], ['active', 'Question'], ['reveal', 'Reveal'], ['next', 'Next']];
+    const cur = step === 'void' ? 'reveal' : step;
+    const steps = stepDefs.map(([id, label], i) => ({ n: i + 1, label, on: cur === id, bg: cur === id ? '#FFD43B' : 'transparent', ink: cur === id ? '#12131A' : '#fff', edge: cur === id ? '#FFD43B' : '#fff',
+      dis: playBlocked && id !== 'build', op: playBlocked && id !== 'build' ? 0.4 : 1,
+      go: () => { if (this.upPhase(this.state, Date.now()).phase.match(/^(uploading|processing|failed)$/) && id !== 'build') return; upd(this.fresh(id, Date.now())); } }));
+    const seg = (items, cb) => items.map(([label, on, val]) => ({ label, on, bg: on ? '#FFD43B' : 'transparent', ink: on ? '#12131A' : '#fff', pick: () => cb(val) }));
+
+    const hints = {
+      build: 'Add an image from the library or upload one (try the sample files), edit the question, then press Play. Flip PLAYER IMAGE or UPLOAD to Fails first to see the problem states.',
+      prepare: S.fail ? 'Image: Fails. Wait about 3 s for the host options. On the phone, tap Retry (switch Image to Loads first for it to succeed).' : S.slow ? 'Loading: Slow. After about 5 s the host sees Wait, Start anyway and Skip.' : 'Players are loading. Everyone starts together after the 3-2-1.',
+      active: 'Tap the image on the phone to enlarge it. The clock keeps running. Pick an answer, or use Jump to 3 s left to see time run out.',
+      reveal: 'The image stays on screen, the correct answer is highlighted and the fact appears. Next question continues the game.',
+      void: 'Voided is a different look from a wrong answer: striped, dashed and neutral. No points change.',
+      next: 'A normal text-only question keeps the layout players already know.'
+    };
+
+    const phoneLabels = { build: 'PLAYER PREVIEW', prepare: "PLAYER'S PHONE", active: "PLAYER'S PHONE", reveal: "PLAYER'S PHONE", void: "PLAYER'S PHONE", next: "PLAYER'S PHONE" };
+    const hostLabels = { build: 'HOST · QUESTION EDITOR', prepare: 'HOST · SHARED SCREEN', active: 'HOST · SHARED SCREEN', reveal: 'HOST · SHARED SCREEN', void: 'HOST · SHARED SCREEN', next: 'HOST · SHARED SCREEN' };
+
+    return {
+      rmCls: S.rm ? 'rm' : '', rm: S.rm, rmBg: S.rm ? '#FFD43B' : 'transparent', rmInk: S.rm ? '#12131A' : '#fff',
+      steps, hint: hints[step], canSkip: step === 'active' && !timeUp,
+      loadSeg: seg([['Normal', !S.slow, false], ['Slow', S.slow, true]], (v) => upd({ slow: v })),
+      upSeg: seg([['Works', !S.upFail, false], ['Fails', S.upFail, true]], (v) => upd({ upFail: v })),
+      failSeg: seg([['Loads', !S.fail, false], ['Fails', S.fail, true]], (v) => upd({ fail: v })),
+      wideSeg: seg([['390', S.wide === 390, 390], ['320', S.wide === 320, 320]], (v) => upd({ wide: v })),
+      toggleMotion: () => upd({ rm: !S.rm }),
+      restart: () => upd({ ...this.fresh('build', Date.now()), up: null, upImg: null, upErr: null, tab: 'lib', image: null, alt: '', answers: ['Jupiter', 'Saturn', 'Neptune', 'Uranus'], correct: 1, prompt: 'Which planet is shown here?', time: 20, pts: 1000 }),
+      skipTimer: () => upd({ skip: S.skip + Math.max(0, total - 3000 - (now - S.t0 + S.skip)) }),
+
+      hostLabel: hostLabels[step], phoneLabel: phoneLabels[step], wide, phoneH: 788,
+      hostBg: step === 'reveal' ? '#CFFAE8' : '#F4F2EC',
+      hBuild: step === 'build', hPrep: step === 'prepare', hActive: step === 'active', hReveal: step === 'reveal', hVoid: step === 'void', hNext: step === 'next',
+
+      // builder
+      hasImage, noImage: !hasImage && !upShow, imgUrl: img ? img.url : '', alt: S.alt, prompt: S.prompt, chars: S.prompt.length, fact: S.fact, edAns,
+      setPrompt: (e) => upd({ prompt: e.target.value.slice(0, 250) }), setFact: (e) => upd({ fact: e.target.value }), setAlt: (e) => upd({ alt: e.target.value }),
+      edTimes: [10, 20, 30, 60, 90, 120].map((t) => ({ label: t + 's', on: S.time === t, bg: S.time === t ? '#2B4BFF' : '#fff', ink: S.time === t ? '#fff' : '#12131A', pick: () => upd({ time: t }) })),
+      edPts: [['Standard', 1000], ['Double', 2000], ['None', 0]].map(([label, v]) => ({ label, on: S.pts === v, bg: S.pts === v ? '#2B4BFF' : '#fff', ink: S.pts === v ? '#fff' : '#12131A', pick: () => upd({ pts: v }) })),
+      openPicker: () => upd({ pickerOpen: true, pending: S.image === 'upload' ? null : S.image, cat: 'All', tab: 'lib', upErr: null }), closePicker: () => upd({ pickerOpen: false, upErr: null, tab: 'lib' }),
+      pickerKey: (e) => { if (e.key === 'Escape') upd({ pickerOpen: false, upErr: null, tab: 'lib' }); },
+      removeImage: () => upd({ image: null, alt: '', up: null, upImg: null }),
+      pickerOpen: S.pickerOpen, cats, thumbs, cannotUse: !S.pending, pendingNote: pend ? 'Selected: ' + pend.name + ' (only you see this name)' : 'Pick a picture to continue.',
+      useImage: () => { if (!pend) return; upd({ image: pend.id, alt: pend.alt, pickerOpen: false, up: null, upImg: null }); },
+      libTab: S.tab === 'lib', upTab: S.tab === 'up',
+      libTabBg: S.tab === 'lib' ? '#FFD43B' : '#fff', libTabInk: '#12131A', upTabBg: S.tab === 'up' ? '#FFD43B' : '#fff', upTabInk: '#12131A',
+      tabLib: () => upd({ tab: 'lib', upErr: null }), tabUp: () => upd({ tab: 'up' }),
+      onFile: (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; this.pickFile({ name: f.name, size: f.size, type: f.type, url: URL.createObjectURL(f) }); e.target.value = ''; },
+      demoFiles: [
+        { label: 'school-trip.jpg · 2.1 MB', f: { name: 'school-trip.jpg', size: 2.1 * 1048576, type: 'image/jpeg', url: '/_blob/99fa09c0dd16eabe46d25526c3e45ce1' } },
+        { label: 'dance-class.gif · 1.4 MB', f: { name: 'dance-class.gif', size: 1.4 * 1048576, type: 'image/gif', url: '' } },
+        { label: 'poster-scan.png · 14.2 MB', f: { name: 'poster-scan.png', size: 14.2 * 1048576, type: 'image/png', url: '' } }
+      ].map((d) => ({ label: d.label, pick: () => this.pickFile(d.f) })),
+      upErr: !!S.upErr,
+      upErrTitle: S.upErr ? (S.upErr.kind === 'format' ? "That file type isn't supported" : 'That file is too large') : '',
+      upErrBody: S.upErr ? (S.upErr.kind === 'format' ? '\u201C' + S.upErr.name + '\u201D is ' + (S.upErr.ext ? 'a ' + S.upErr.ext + ' file' : 'not a picture type we can use') + '. Choose a JPEG, PNG or WebP picture instead.' : '\u201C' + S.upErr.name + '\u201D is ' + sizeOf(S.upErr.size) + '. The limit is 5 MB. Try a smaller picture or save it at a lower quality.') : '',
+      chooseLabel: S.upErr ? 'Choose a different file' : 'Choose a file',
+      upBusy, upFailed, prevShow: hasImage && !upShow, isUpload: hasImage && S.image === 'upload', upImgName: S.upImg ? S.upImg.name : '', upImgSize: S.upImg ? sizeOf(S.upImg.size) : '',
+      upName: S.up ? S.up.name : '', upSize: S.up ? sizeOf(S.up.size) : '', upPct: U.pct, upPctLabel: U.phase === 'processing' ? '' : U.pct + '%',
+      upLabel: U.phase === 'processing' ? 'Checking your image\u2026' : 'Uploading\u2026',
+      upBarBg: U.phase === 'processing' ? '#8FD3FF' : '#2B4BFF', upBarCls: U.phase === 'processing' ? 'pulse' : '',
+      cancelUpload: () => upd({ up: null }), retryUpload: () => upd({ up: { ...S.up, t: Date.now(), status: 'sending' } }),
+      playBlocked, playNote: upFailed ? "The image didn't upload. Retry or cancel to continue." : 'Your image is still uploading. You can start once it is done.',
+      phHas, altP: S.alt || 'Picture for this question', altPh: 'e.g. A group of students on a hillside',
+      playIt: () => { if (this.upPhase(this.state, Date.now()).phase.match(/^(uploading|processing|failed)$/)) return; upd(this.fresh('prepare', Date.now())); },
+
+      // prepare (host)
+      prepTitle, prepBody, readyCount: p.ready, dots, countLeft: p.countLeft,
+      pLoading: ph === 'loading', pDelayed: ph === 'delayed', pFailed: ph === 'failed', pCounting: ph === 'counting', pReady: ph === 'ready',
+      problemCount: 20 - p.ready,
+      waitMore: () => upd({ resumedAt: Date.now() }),
+      startAnyway: () => upd({ countStart: Date.now(), startAnyway: true }),
+      skipQ: () => upd({ ...this.fresh('void', Date.now()), voidReason: 'skipped' }),
+      voidIt: () => upd({ ...this.fresh('void', Date.now()), voidReason: 'problem' }),
+      revealNow: () => upd({ ...this.fresh('reveal', Date.now()), picked: S.picked, pickEl: S.pickEl }),
+      nextQ: () => upd({ ...this.fresh('next', Date.now()) }),
+
+      // host active
+      secs, pct, answered, hostProblem: S.fail && !S.recovered, hostAns: S.answers.map((label, i) => ({ label, ...keyOf(i) })),
+
+      // host reveal
+      revAns, pctRight: Math.round(counts[right] / 20 * 100),
+      voidBody, phoneVoidBody, nextAns, nextPhoneAns: nextAns,
+
+      // phone
+      pAct: step === 'build' || step === 'active', pPrep: step === 'prepare', pReveal: step === 'reveal', pVoid: step === 'void', pNext: step === 'next',
+      ptsLabel: S.pts === 0 ? '0 PTS' : S.pts === 2000 ? '2× POINTS' : '1× POINTS',
+      pPromptSize: phHas ? (wide === 320 ? 18 : 20) : (wide === 320 ? 24 : 28),
+      pAnsSize: phHas ? (wide === 320 ? 17 : 20) : (wide === 320 ? 20 : 24),
+      rowMax: phHas ? 76 : 110, imgH,
+      imgLoaded: phHas && imgState === 'loaded', imgLoading: phHas && imgState === 'loading', imgFailed: phHas && imgState === 'failed', imgRetrying: phHas && imgState === 'retrying',
+      phoneAns, strip, stripBg, stripInk,
+      zoom: S.zoom && step === 'active', zoomIn: () => upd({ zoom: true }), zoomOut: () => upd({ zoom: false }), zoomKey: (e) => { if (e.key === 'Escape') upd({ zoom: false }); },
+      retry: () => upd({ retryAt: Date.now() }),
+      qLoading: qp === 'loading', qRetrying: qp === 'retrying', qFailed: qp === 'failed', qReady: qp === 'ready', qCounting: qp === 'counting', countNote,
+
+      rvRight: outcome === 'right', rvWrong: outcome === 'wrong', rvNone: outcome === 'none',
+      rvBg: outcome === 'right' ? '#2EE6A6' : outcome === 'wrong' ? '#FF9AD5' : '#8FD3FF',
+      rvTitle: outcome === 'right' ? 'Nailed it!' : outcome === 'wrong' ? 'So close!' : "Time's up!",
+      rvPoints: outcome === 'right' ? '+' + fmt(earned) : outcome === 'wrong' ? '+0' : 'No answer',
+      rvImgH: wide === 320 ? 110 : 140, rvTotal,
+      rightLabel: S.answers[right], rightColor: rk.color, rTri: rk.isTri, rDia: rk.isDia, rCir: rk.isCir, rSqu: rk.isSqu
+    };
+  }
+}
+</script>
+</body>
+</html>

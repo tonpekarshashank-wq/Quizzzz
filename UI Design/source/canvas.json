@@ -1,33 +1,176 @@
 {
   "v": 3,
   "attachments": {},
-  "createdOnFiles": { "v": 1, "at": "2026-10-06T12:00:00Z" },
-  "title": "Quizzzz UI Design",
-  "launch": { "view": "canvas" },
   "boards": {
-    "Main.dc.html": { "x": 0, "y": 0, "w": 1360, "h": 820, "title": "Host · Quiz builder", "is_interactive": true },
-    "Lobby.dc.html": { "x": 1440, "y": 0, "w": 1360, "h": 820, "title": "Host · Lobby ticket" },
-    "Foundations.dc.html": { "x": 2880, "y": 0, "w": 1360, "h": 820, "title": "Design language" },
-    "Question.dc.html": { "x": 0, "y": 940, "w": 1360, "h": 820, "title": "Host · Question live" },
-    "Reveal.dc.html": { "x": 1440, "y": 940, "w": 1360, "h": 820, "title": "Host · Answer reveal" },
-    "Leaderboard.dc.html": { "x": 2880, "y": 940, "w": 1360, "h": 820, "title": "Host · Themed leaderboard", "is_interactive": true },
-    "Podium.dc.html": { "x": 4320, "y": 940, "w": 1360, "h": 820, "title": "Host · Winner cards" },
-    "PhoneJoin.dc.html": { "x": 0, "y": 1880, "w": 390, "h": 844, "title": "Player · Enter code" },
-    "PhoneName.dc.html": { "x": 470, "y": 1880, "w": 390, "h": 844, "title": "Player · Make your blob" },
-    "PhoneWait.dc.html": { "x": 940, "y": 1880, "w": 390, "h": 844, "title": "Player · Waiting room" },
-    "PhoneAnswer.dc.html": { "x": 1410, "y": 1880, "w": 390, "h": 844, "title": "Player · Answer", "is_interactive": true },
-    "PhoneCorrect.dc.html": { "x": 1880, "y": 1880, "w": 390, "h": 844, "title": "Player · Correct" },
-    "PhoneWrong.dc.html": { "x": 2350, "y": 1880, "w": 390, "h": 844, "title": "Player · So close" },
-    "PhoneFinal.dc.html": { "x": 2820, "y": 1880, "w": 390, "h": 844, "title": "Player · Final rank" }
+    "Foundations.dc.html": {
+      "h": 820,
+      "title": "Design language",
+      "w": 1360,
+      "x": 2880,
+      "y": 0
+    },
+    "Leaderboard.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "title": "Host \u00b7 Themed leaderboard",
+      "w": 1360,
+      "x": 2880,
+      "y": 940
+    },
+    "Lobby.dc.html": {
+      "h": 820,
+      "title": "Host \u00b7 Lobby ticket",
+      "w": 1360,
+      "x": 1440,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "title": "Host \u00b7 Quiz builder",
+      "w": 1360,
+      "x": 0,
+      "y": 0
+    },
+    "PhoneAnswer.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Player \u00b7 Answer",
+      "w": 390,
+      "x": 1410,
+      "y": 1880
+    },
+    "PhoneCorrect.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 Correct",
+      "w": 390,
+      "x": 1880,
+      "y": 1880
+    },
+    "PhoneFinal.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 Final rank",
+      "w": 390,
+      "x": 2820,
+      "y": 1880
+    },
+    "PhoneJoin.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 Enter code",
+      "w": 390,
+      "x": 0,
+      "y": 1880
+    },
+    "PhoneName.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 Make your blob",
+      "w": 390,
+      "x": 470,
+      "y": 1880
+    },
+    "PhoneWait.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 Waiting room",
+      "w": 390,
+      "x": 940,
+      "y": 1880
+    },
+    "PhoneWrong.dc.html": {
+      "h": 844,
+      "title": "Player \u00b7 So close",
+      "w": 390,
+      "x": 2350,
+      "y": 1880
+    },
+    "Podium.dc.html": {
+      "h": 820,
+      "title": "Host \u00b7 Winner cards",
+      "w": 1360,
+      "x": 4320,
+      "y": 940
+    },
+    "Question.dc.html": {
+      "h": 820,
+      "title": "Host \u00b7 Question live",
+      "w": 1360,
+      "x": 0,
+      "y": 940
+    },
+    "Reveal.dc.html": {
+      "h": 820,
+      "title": "Host \u00b7 Answer reveal",
+      "w": 1360,
+      "x": 1440,
+      "y": 940
+    },
+    "ImageQuestion.dc.html": {
+      "x": 0,
+      "y": 2844,
+      "w": 1440,
+      "h": 960,
+      "title": "Image questions \u00b7 prototype",
+      "is_interactive": true
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-06T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t1": {
+      "kind": "title1",
+      "maxW": 4240,
+      "text": "1 \u00b7 Build the quiz, open the room",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 5680,
+      "text": "2 \u00b7 Live on the big screen",
+      "w": 240,
+      "x": 0,
+      "y": 640
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "3 \u00b7 On the player's phone",
+      "w": 240,
+      "x": 0,
+      "y": 1580
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 1440,
+      "text": "4 \u00b7 Image questions (clickable prototype)",
+      "w": 240,
+      "x": 0,
+      "y": 2544
+    }
   },
   "order": [
-    "Main.dc.html", "Lobby.dc.html", "Foundations.dc.html", "Question.dc.html", "Reveal.dc.html", "Leaderboard.dc.html", "Podium.dc.html",
-    "PhoneJoin.dc.html", "PhoneName.dc.html", "PhoneWait.dc.html", "PhoneAnswer.dc.html", "PhoneCorrect.dc.html", "PhoneWrong.dc.html", "PhoneFinal.dc.html"
+    "Main.dc.html",
+    "Lobby.dc.html",
+    "Foundations.dc.html",
+    "Question.dc.html",
+    "Reveal.dc.html",
+    "Leaderboard.dc.html",
+    "Podium.dc.html",
+    "PhoneJoin.dc.html",
+    "PhoneName.dc.html",
+    "PhoneWait.dc.html",
+    "PhoneAnswer.dc.html",
+    "PhoneCorrect.dc.html",
+    "PhoneWrong.dc.html",
+    "PhoneFinal.dc.html",
+    "ImageQuestion.dc.html"
   ],
-  "notes": {
-    "t1": { "x": 0, "y": -300, "text": "1 · Build the quiz, open the room", "kind": "title1", "maxW": 4240 },
-    "t2": { "x": 0, "y": 640, "text": "2 · Live on the big screen", "kind": "title1", "maxW": 5680 },
-    "t3": { "x": 0, "y": 1580, "text": "3 · On the player's phone", "kind": "title1", "maxW": 3210 }
-  },
-  "designSystems": []
+  "pages": [],
+  "title": "Quizzzz UI Design"
 }

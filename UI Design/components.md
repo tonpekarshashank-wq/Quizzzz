@@ -44,7 +44,7 @@ The crown on the leader (sun with ink outline) sits above the body at roughly `t
 
 ## Answer key
 
-A square badge holding the shape. Always paired with a text label.
+A square badge holding the card suit (heart, diamond, spade or club). Always paired with a text label.
 
 | Context | Badge size | Radius | Shape size |
 | :--- | :--- | :--- | :--- |

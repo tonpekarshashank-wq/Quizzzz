@@ -21,11 +21,11 @@
   --sky-tint: #d3eeff;
   --muted: #3b4152;
 
-  /* Answer keys: color plus shape. Diamond uses a white shape. */
-  --key-1: var(--tangerine); /* triangle */
-  --key-2: var(--cobalt);    /* diamond  */
-  --key-3: var(--sun);       /* circle   */
-  --key-4: var(--mint);      /* square   */
+  /* Answer keys: color plus playing-card suit. Diamond uses a white shape. */
+  --key-1: var(--tangerine); /* heart   */
+  --key-2: var(--cobalt);    /* diamond */
+  --key-3: var(--sun);       /* spade   */
+  --key-4: var(--mint);      /* club    */
 
   /* Type */
   --font-display: "Bricolage Grotesque", sans-serif;

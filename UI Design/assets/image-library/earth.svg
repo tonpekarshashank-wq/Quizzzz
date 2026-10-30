@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs>
+<radialGradient id="bg" cx="50%" cy="50%" r="75%"><stop offset="0" stop-color="#14224F"/><stop offset="1" stop-color="#05060F"/></radialGradient>
+<radialGradient id="oc" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#5AB2FF"/><stop offset="0.6" stop-color="#2B6FD6"/><stop offset="1" stop-color="#143A8C"/></radialGradient>
+<radialGradient id="gl" cx="50%" cy="50%" r="50%"><stop offset="0.82" stop-color="#8FD3FF" stop-opacity="0.5"/><stop offset="1" stop-color="#8FD3FF" stop-opacity="0"/></radialGradient>
+<linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0.5" stop-color="#05060F" stop-opacity="0"/><stop offset="1" stop-color="#05060F" stop-opacity="0.6"/></linearGradient>
+<clipPath id="disc"><circle cx="400" cy="300" r="200"/></clipPath>
+</defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<g fill="#F4F2EC"><circle cx="80" cy="90" r="2"/><circle cx="190" cy="40" r="1.5"/><circle cx="660" cy="80" r="2.5"/><circle cx="740" cy="200" r="1.5"/><circle cx="60" cy="400" r="2"/><circle cx="150" cy="540" r="2"/><circle cx="700" cy="520" r="2"/><circle cx="600" cy="570" r="1.5"/><circle cx="300" cy="30" r="2"/></g>
+<circle cx="400" cy="300" r="236" fill="url(#gl)"/>
+<circle cx="400" cy="300" r="200" fill="url(#oc)"/>
+<g clip-path="url(#disc)">
+<path d="M290 170c40-20 90-10 110 20 14 22-6 40-30 46-20 6-24 30-6 44 20 16 4 44-24 46-26 2-44-18-46-44-2-30-30-46-24-76 4-16 10-26 20-36z" fill="#4DB26B"/>
+<path d="M470 330c30-14 70-6 86 20 14 22 4 56-20 70-22 12-52 4-62-20-8-20-14-56-4-70z" fill="#5FC27A"/>
+<path d="M300 400c22-8 44 6 40 26-4 20-30 30-48 20-14-8-12-38 8-46z" fill="#D8C27A"/>
+<path d="M500 180c24-10 56 2 62 24 4 16-8 26-26 26-20 0-44-4-44-22 0-12 2-22 8-28z" fill="#D8C27A"/>
+<g fill="#fff" opacity="0.8"><ellipse cx="330" cy="250" rx="90" ry="14" transform="rotate(-12 330 250)"/><ellipse cx="470" cy="400" rx="100" ry="12" transform="rotate(10 470 400)"/><ellipse cx="420" cy="170" rx="70" ry="10"/><ellipse cx="300" cy="360" rx="50" ry="9" transform="rotate(8 300 360)"/></g>
+<circle cx="400" cy="300" r="200" fill="url(#sh)"/>
+</g>
+</svg>
